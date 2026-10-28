@@ -421,3 +421,95 @@ button:focus-visible {
         transition: none;
     }
 }
+
+/* Game-over screen */
+
+.player-area--results {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.owned-major-arcana {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 0.25rem 0.25rem 0.75rem;
+}
+
+.owned-major-arcana__card {
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 110px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 150px;
+    padding: 0.75rem;
+    border: 1px solid #b9a7d9;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #352945, #211a2c);
+    color: #e7ddf7;
+    text-align: center;
+    overflow-wrap: anywhere;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+}
+
+.owned-major-arcana__card strong {
+    font-size: 0.85rem;
+}
+
+.game-results {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+}
+
+.game-results__announcement,
+.game-results__scores {
+    min-width: 0;
+}
+
+.game-results__announcement h2,
+.game-results__scores h2 {
+    margin-bottom: 1rem;
+}
+
+.game-results__announcement p {
+    margin: 0;
+    color: #e7ddf7;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.game-results__scores p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #4d405e;
+}
+
+.game-results__scores p strong {
+    font-size: 1.5rem;
+    color: #e7ddf7;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+    .game-results {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .owned-major-arcana__card {
+        flex-basis: 90px;
+        min-height: 125px;
+        padding: 0.5rem;
+    }
+}

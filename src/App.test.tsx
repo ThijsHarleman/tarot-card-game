@@ -250,4 +250,113 @@ describe('App', () => {
             screen.getByRole('group', { name: 'Cards played this round' }),
         ).toHaveTextContent('No bids yet')
     })
+
+    it('shows final scores and owned Major Arcana only after the game ends', async () => {
+        const user = userEvent.setup()
+        render(<App />)
+
+        // Scores should not be displayed during normal play.
+        expect(
+            screen.queryByRole('heading', { name: 'Final scores' }),
+        ).not.toBeInTheDocument()
+
+        expect(
+            screen.queryByRole('heading', { name: 'Game over' }),
+        ).not.toBeInTheDocument()
+
+        // The player remains active after passing, so passing through
+        // all 22 prizes ends the game.
+        const passButton = screen.getByRole('button', {
+            name: /pass turn/i,
+        })
+
+        for (let round = 0; round < 22; round += 1) {
+            await user.click(passButton)
+        }
+
+        expect(
+            screen.getByRole('heading', { name: 'Game over' }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByRole('heading', { name: 'Final scores' }),
+        ).toBeInTheDocument()
+
+        // With no bids, the opponent receives every prize.
+        // The sum of Major Arcana values 0 through 21 is 231.
+        expect(screen.getByText('You lose.')).toBeInTheDocument()
+
+        const results = screen.getByRole('region', {
+            name: 'Game results',
+        })
+
+        expect(within(results).getByText('231')).toBeInTheDocument()
+        expect(within(results).getByText('0')).toBeInTheDocument()
+
+        // Each player's result area shows their currently owned
+        // Major Arcana cards, not their other card zones.
+        const opponentArea = screen.getByRole('region', {
+            name: 'Opponent',
+        })
+        const playerArea = screen.getByRole('region', {
+            name: 'You',
+        })
+
+        expect(
+            within(opponentArea).getByRole('group', {
+                name: "Opponent's Major Arcana",
+            }),
+        ).toHaveTextContent('The Fool')
+
+        expect(
+            within(opponentArea).getByRole('group', {
+                name: "Opponent's Major Arcana",
+            }),
+        ).toHaveTextContent('The World')
+
+        expect(
+            within(playerArea).getByRole('group', {
+                name: "You's Major Arcana",
+            }),
+        ).toHaveTextContent('No Major Arcana owned')
+
+        expect(
+            within(opponentArea).queryByRole('group', {
+                name: "Opponent's hand",
+            }),
+        ).not.toBeInTheDocument()
+
+        expect(
+            within(opponentArea).queryByRole('group', {
+                name: "Opponent's draw deck",
+            }),
+        ).not.toBeInTheDocument()
+
+        expect(
+            within(opponentArea).queryByRole('group', {
+                name: "Opponent's discard pile",
+            }),
+        ).not.toBeInTheDocument()
+
+        expect(
+            screen.queryByRole('button', { name: /pass turn/i }),
+        ).not.toBeInTheDocument()
+
+        // Starting a new game should restore the normal game screen.
+        await user.click(
+            screen.getByRole('button', { name: /new game/i }),
+        )
+
+        expect(
+            screen.queryByRole('heading', { name: 'Game over' }),
+        ).not.toBeInTheDocument()
+
+        expect(
+            screen.getByRole('button', { name: /pass turn/i }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.queryByRole('heading', { name: 'Final scores' }),
+        ).not.toBeInTheDocument()
+    })
 })

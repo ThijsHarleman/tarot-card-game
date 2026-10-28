@@ -4,80 +4,147 @@ import './App.css'
 import type { Player } from './game/player'
 import type { TarotCard } from './game/cards/card'
 import { createGame, passTurn, playCard } from './game/game'
+import { calculateScore, getOwnedMajorArcana } from './game/score'
 import { PlayingCard } from './components/PlayingCard'
 
 function PlayerArea({
     player,
     isActive,
+    isGameOver,
     onPlay,
 }: {
     player: Player
     isActive: boolean
+    isGameOver: boolean
     onPlay: (card: TarotCard) => void
 }) {
+    const ownedMajorArcana = isGameOver
+        ? getOwnedMajorArcana(player)
+        : []
+
     return (
         <section
-            className={`player-area${isActive ? ' player-area--active' : ''}`}
+            className={`player-area${isActive && !isGameOver ? ' player-area--active' : ''}${isGameOver ? ' player-area--results' : ''}`}
             aria-label={player.name}
         >
-            <h2>{player.name}{isActive ? ' — Your turn' : ''}</h2>
+            <h2>
+                {player.name}
+                {isActive && !isGameOver ? ' — Your turn' : ''}
+            </h2>
 
-            <div className="player-area__content">
+            {isGameOver ? (
                 <div
-                    className="card-pile"
+                    className="owned-major-arcana"
                     role="group"
-                    aria-label={`${player.name}'s draw deck`}
+                    aria-label={`${player.name}'s Major Arcana`}
                 >
-                    <span>Deck</span>
-                    <strong>{player.deck.length}</strong>
-                </div>
-
-                <div
-                    className="court-reserve"
-                    role="group"
-                    aria-label={`${player.name}'s court cards`}
-                >
-                    {player.courtCards.map((card) => (
-                        <button
-                            className="court-reserve__card"
-                            key={card.id}
-                            onClick={() => onPlay(card)}
-                            aria-label={`Play ${card.id}`}
-                        >
-                            <PlayingCard card={card} />
-                        </button>
+                    {ownedMajorArcana.map((card) => (
+                        <div className="owned-major-arcana__card" key={card.id}>
+                            <span className="major-arcana-number">
+                                {card.number}
+                            </span>
+                            <strong>{card.name}</strong>
+                        </div>
                     ))}
-                    {player.courtCards.length === 0 && (
-                        <p className="empty-message">No court cards remaining</p>
+
+                    {ownedMajorArcana.length === 0 && (
+                        <p className="empty-message">
+                            No Major Arcana owned
+                        </p>
                     )}
                 </div>
+            ) : (
+                <div className="player-area__content">
+                    <div
+                        className="card-pile"
+                        role="group"
+                        aria-label={`${player.name}'s draw deck`}
+                    >
+                        <span>Deck</span>
+                        <strong>{player.deck.length}</strong>
+                    </div>
 
-                <div
-                    className="hand"
-                    role="group"
-                    aria-label={`${player.name}'s hand`}
-                >
-                    {player.hand.map((card, index) => (
-                        <button
-                            className="hand__card"
-                            key={`${card.id}-${index}`}
-                            onClick={() => onPlay(card)}
-                            aria-label={`Play ${card.id}`}
-                        >
-                            <PlayingCard card={card} />
-                        </button>
-                    ))}
-                    {player.hand.length === 0 && <p>No cards in hand</p>}
-                </div>
+                    <div
+                        className="court-reserve"
+                        role="group"
+                        aria-label={`${player.name}'s court cards`}
+                    >
+                        {player.courtCards.map((card) => (
+                            <button
+                                className="court-reserve__card"
+                                key={card.id}
+                                onClick={() => onPlay(card)}
+                                aria-label={`Play ${card.id}`}
+                            >
+                                <PlayingCard card={card} />
+                            </button>
+                        ))}
+                        {player.courtCards.length === 0 && (
+                            <p className="empty-message">
+                                No court cards remaining
+                            </p>
+                        )}
+                    </div>
 
-                <div
-                    className="card-pile card-pile--discard"
-                    role="group"
-                    aria-label={`${player.name}'s discard pile`}
-                >
-                    <span>Discard</span>
-                    <strong>{player.discardPile.length}</strong>
+                    <div
+                        className="hand"
+                        role="group"
+                        aria-label={`${player.name}'s hand`}
+                    >
+                        {player.hand.map((card, index) => (
+                            <button
+                                className="hand__card"
+                                key={`${card.id}-${index}`}
+                                onClick={() => onPlay(card)}
+                                aria-label={`Play ${card.id}`}
+                            >
+                                <PlayingCard card={card} />
+                            </button>
+                        ))}
+                        {player.hand.length === 0 && <p>No cards in hand</p>}
+                    </div>
+
+                    <div
+                        className="card-pile card-pile--discard"
+                        role="group"
+                        aria-label={`${player.name}'s discard pile`}
+                    >
+                        <span>Discard</span>
+                        <strong>{player.discardPile.length}</strong>
+                    </div>
                 </div>
+            )}
+        </section>
+    )
+}
+
+function GameResults({
+    player,
+    opponent,
+}: {
+    player: Player
+    opponent: Player
+}) {
+    const playerScore = calculateScore(player)
+    const opponentScore = calculateScore(opponent)
+
+    return (
+        <section className="play-area game-results" aria-label="Game results">
+            <div className="game-results__announcement">
+                <h2>Game over</h2>
+                <p>{playerScore > opponentScore ? 'You win!' : 'You lose.'}</p>
+            </div>
+
+            <div className="game-results__scores">
+                <h2>Final scores</h2>
+                <p>
+                    <span>You</span>
+                    <strong>{playerScore}</strong>
+                </p>
+                <p>
+                    <span>Opponent</span>
+                    <strong>{opponentScore}</strong>
+                </p>
             </div>
         </section>
     )
@@ -110,56 +177,66 @@ function App() {
             <PlayerArea
                 player={game.opponent}
                 isActive={game.activePlayerId === 'opponent'}
+                isGameOver={game.isGameOver}
                 onPlay={handlePlay}
             />
 
-            <section className="play-area" aria-label="Auction area">
-                <div
-                    className="current-prize"
-                    role="group"
-                    aria-label="Current Major Arcana prize"
-                >
-                    <h2>Prize</h2>
-                    <div className="major-arcana-card">
-                        <span className="major-arcana-number">
-                            {game.currentMajorArcana.number}
-                        </span>
-                        <strong>{game.currentMajorArcana.name}</strong>
+            {game.isGameOver ? (
+                <GameResults player={game.player} opponent={game.opponent} />
+            ) : (
+                <section className="play-area" aria-label="Auction area">
+                    <div
+                        className="current-prize"
+                        role="group"
+                        aria-label="Current Major Arcana prize"
+                    >
+                        <h2>Prize</h2>
+                        <div className="major-arcana-card">
+                            <span className="major-arcana-number">
+                                {game.currentMajorArcana.number}
+                            </span>
+                            <strong>{game.currentMajorArcana.name}</strong>
+                        </div>
                     </div>
-                </div>
 
-                <div
-                    className="bidding-area"
-                    role="group"
-                    aria-label="Cards played this round"
-                >
-                    <h2>Bids</h2>
-                    <div className="played-cards">
-                        {game.playedCards.map((card) => (
-                            <div className="played-card" key={card.id}>
-                                {card.kind === 'major' ? (
-                                    <strong>{card.name}</strong>
-                                ) : (
-                                    <span>
-                                        {card.rank} of {card.suit}
-                                    </span>
-                                )}
-                            </div>
-                        ))}
+                    <div
+                        className="bidding-area"
+                        role="group"
+                        aria-label="Cards played this round"
+                    >
+                        <h2>Bids</h2>
+                        <div className="played-cards">
+                            {game.playedCards.map((card) => (
+                                <div className="played-card" key={card.id}>
+                                    {card.kind === 'major' ? (
+                                        <strong>{card.name}</strong>
+                                    ) : (
+                                        <span>
+                                            {card.rank} of {card.suit}
+                                        </span>
+                                    )}
+                                </div>
+                            ))}
 
-                        {game.playedCards.length === 0 && (
-                            <p>No bids yet</p>
-                        )}
+                            {game.playedCards.length === 0 && (
+                                <p>No bids yet</p>
+                            )}
+                        </div>
                     </div>
-                </div>
-                <button className="pass-turn-button" onClick={handlePass}>
-                    Pass turn
-                </button>
-            </section>
+
+                    <button
+                        className="pass-turn-button"
+                        onClick={handlePass}
+                    >
+                        Pass turn
+                    </button>
+                </section>
+            )}
 
             <PlayerArea
                 player={game.player}
                 isActive={game.activePlayerId === 'player'}
+                isGameOver={game.isGameOver}
                 onPlay={handlePlay}
             />
         </main>
