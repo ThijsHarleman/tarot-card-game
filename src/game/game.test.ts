@@ -7,22 +7,22 @@ import { HAND_LIMIT } from './rules'
 
 const ace: TarotCard = {
     kind: 'minor',
-    id: 'minor-cups-ace',
-    suit: 'cups',
+    id: 'minor-wands-ace',
+    suit: 'wands',
     rank: 'ace',
 }
 
 const two: TarotCard = {
     kind: 'minor',
-    id: 'minor-cups-two',
-    suit: 'cups',
+    id: 'minor-wands-two',
+    suit: 'wands',
     rank: 'two',
 }
 
 const three: TarotCard = {
     kind: 'minor',
-    id: 'minor-cups-three',
-    suit: 'cups',
+    id: 'minor-wands-three',
+    suit: 'wands',
     rank: 'three',
 }
 
@@ -41,28 +41,63 @@ function makePlayer(
 }
 
 describe('createGame', () => {
-    it('creates two players with separate decks', () => {
+    it('creates two players with separate suits and full opening hands', () => {
         const game = createGame()
 
-        expect(game.player.deck).toHaveLength(10)
-        expect(game.opponent.deck).toHaveLength(10)
+        expect(game.player.hand).toHaveLength(HAND_LIMIT)
+        expect(game.opponent.hand).toHaveLength(HAND_LIMIT)
+
+        expect(game.player.deck).toHaveLength(5)
+        expect(game.opponent.deck).toHaveLength(5)
 
         expect(game.player.courtCards).toHaveLength(4)
         expect(game.opponent.courtCards).toHaveLength(4)
 
         expect(
-            game.player.deck.every((card) => card.kind === 'minor'),
+            [...game.player.deck, ...game.player.hand].every(
+                (card) => card.kind === 'minor' && card.suit === 'wands',
+            ),
         ).toBe(true)
 
         expect(
-            game.opponent.deck.every((card) => card.kind === 'minor'),
+            [...game.opponent.deck, ...game.opponent.hand].every(
+                (card) => card.kind === 'minor' && card.suit === 'swords',
+            ),
         ).toBe(true)
-
-        const playerIds = new Set(game.player.deck.map((card) => card.id))
 
         expect(
-            game.opponent.deck.every((card) => !playerIds.has(card.id)),
+            game.player.courtCards.every(
+                (card) => card.kind === 'minor' && card.suit === 'wands',
+            ),
         ).toBe(true)
+
+        expect(
+            game.opponent.courtCards.every(
+                (card) => card.kind === 'minor' && card.suit === 'swords',
+            ),
+        ).toBe(true)
+
+        const playerCardIds = [
+            ...game.player.deck,
+            ...game.player.hand,
+            ...game.player.courtCards,
+        ].map((card) => card.id)
+
+        const opponentCardIds = [
+            ...game.opponent.deck,
+            ...game.opponent.hand,
+            ...game.opponent.courtCards,
+        ].map((card) => card.id)
+
+        expect(new Set(playerCardIds).size).toBe(14)
+        expect(new Set(opponentCardIds).size).toBe(14)
+
+        expect(
+            opponentCardIds.some((id) => playerCardIds.includes(id)),
+        ).toBe(false)
+
+        expect(game.activePlayerId).toBe('player')
+        expect(game.playedCards).toEqual([])
     })
 })
 
@@ -88,18 +123,33 @@ describe('drawToHand', () => {
         expect(result.hand).toHaveLength(3)
         expect(result.deck).toEqual([])
         expect(result.discardPile).toEqual([])
+
         expect(result.hand.map((card) => card.id).sort()).toEqual(
             [ace, two, three].map((card) => card.id).sort(),
         )
     })
 
-    it('does not draw more than five cards', () => {
+    it('does not draw more than the hand limit', () => {
         const cards = createPlayerDeck('wands').slice(0, 7)
 
         const result = drawToHand(makePlayer({ deck: cards }))
 
         expect(result.hand).toHaveLength(HAND_LIMIT)
         expect(result.deck).toHaveLength(2)
+    })
+
+    it('does not draw if the hand is already full', () => {
+        const cards = createPlayerDeck('wands')
+
+        const player = makePlayer({
+            hand: cards.slice(0, HAND_LIMIT),
+            deck: cards.slice(HAND_LIMIT),
+        })
+
+        const result = drawToHand(player)
+
+        expect(result.hand).toHaveLength(HAND_LIMIT)
+        expect(result.deck).toHaveLength(5)
     })
 
     it('leaves an empty player unchanged when no cards are available', () => {
@@ -112,6 +162,7 @@ describe('drawToHand', () => {
 describe('playCard', () => {
     it('plays a legal card and switches turns', () => {
         const game = createGame()
+
         const state = {
             ...game,
             player: makePlayer({ hand: [ace, two] }),
@@ -124,15 +175,20 @@ describe('playCard', () => {
         expect(result.activePlayerId).toBe('opponent')
     })
 
-    it('does not play a card that is not in the active hand', () => {
+    it('does not play a card that is not in the active hand or reserve', () => {
         const game = createGame()
-        const result = playCard(game, ace.id)
 
-        expect(result).toBe(game)
+        const state = {
+            ...game,
+            player: makePlayer(),
+        }
+
+        expect(playCard(state, ace.id)).toBe(state)
     })
 
     it('rejects a card that does not outrank the previous card', () => {
         const game = createGame()
+
         const state = {
             ...game,
             player: makePlayer({ hand: [two] }),
@@ -144,6 +200,7 @@ describe('playCard', () => {
 
     it('allows an ace on any previously played card', () => {
         const game = createGame()
+
         const state = {
             ...game,
             player: makePlayer({ hand: [ace] }),
@@ -173,18 +230,58 @@ describe('playCard', () => {
 })
 
 describe('passTurn', () => {
-    it('moves played cards to the passing player and clears the play area', () => {
+    it('moves played cards to the passing player, refills hands, and keeps them active', () => {
         const game = createGame()
+
         const state = {
             ...game,
-            player: makePlayer({ discardPile: [ace] }),
-            playedCards: [two, three],
+            player: makePlayer({
+                hand: [ace, two],
+                deck: createPlayerDeck('wands').filter(
+                    (card) => card.id !== ace.id && card.id !== two.id,
+                ),
+                discardPile: [],
+            }),
+            activePlayerId: 'player' as const,
+            playedCards: [three],
         }
 
         const result = passTurn(state)
 
-        expect(result.player.discardPile).toEqual([ace, two, three])
+        // Played cards go to the passing player's discard pile.
+        expect(result.player.discardPile).toContainEqual(three)
+
+        // The play area is cleared for the new round.
         expect(result.playedCards).toEqual([])
-        expect(result.activePlayerId).toBe('opponent')
+
+        // The player who passed starts the next round.
+        expect(result.activePlayerId).toBe('player')
+
+        // Both hands refill up to the hand limit when cards are available.
+        expect(result.player.hand).toHaveLength(HAND_LIMIT)
+        expect(result.opponent.hand).toHaveLength(HAND_LIMIT)
+    })
+
+    it('recycles the passing player’s discard pile when refilling the next round', () => {
+        const game = createGame()
+
+        const state = {
+            ...game,
+            player: makePlayer({
+                hand: [ace, two, three],
+                deck: [],
+                discardPile: [],
+            }),
+            activePlayerId: 'player' as const,
+            playedCards: [],
+        }
+
+        const result = passTurn(state)
+
+        // With no deck or discard cards available, the hand cannot refill.
+        expect(result.player.hand).toEqual([ace, two, three])
+        expect(result.player.deck).toEqual([])
+        expect(result.player.discardPile).toEqual([])
+        expect(result.activePlayerId).toBe('player')
     })
 })

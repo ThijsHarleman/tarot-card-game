@@ -14,7 +14,7 @@ export interface GameState {
 }
 
 export function createGame(): GameState {
-    return {
+    const initialState: GameState = {
         player: {
             id: 'player',
             name: 'You',
@@ -34,6 +34,11 @@ export function createGame(): GameState {
         activePlayerId: 'player',
         playedCards: [],
     }
+
+    return drawForPlayer(
+        drawForPlayer(initialState, 'player'),
+        'opponent',
+    )
 }
 
 function updatePlayer(
@@ -131,11 +136,15 @@ export function passTurn(state: GameState): GameState {
         discardPile: [...player.discardPile, ...state.playedCards],
     }
 
-    const updatedState = updatePlayer(state, updatedPlayer)
-
-    return {
-        ...updatedState,
+    const nextState: GameState = {
+        ...updatePlayer(state, updatedPlayer),
         playedCards: [],
-        activePlayerId: state.activePlayerId === 'player' ? 'opponent' : 'player',
     }
+
+    // Refill both hands for the next round.
+    // The player who passed remains the starting player.
+    return drawForPlayer(
+        drawForPlayer(nextState, 'player'),
+        'opponent',
+    )
 }

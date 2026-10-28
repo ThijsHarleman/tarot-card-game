@@ -3,19 +3,16 @@ import { useState } from 'react'
 import './App.css'
 import type { Player } from './game/player'
 import type { TarotCard } from './game/cards/card'
-import { createGame, drawForPlayer, passTurn, playCard } from './game/game'
-import { HAND_LIMIT } from './game/rules'
+import { createGame, passTurn, playCard } from './game/game'
 import { PlayingCard } from './components/PlayingCard'
 
 function PlayerArea({
     player,
     isActive,
-    onDraw,
     onPlay,
 }: {
     player: Player
     isActive: boolean
-    onDraw: () => void
     onPlay: (card: TarotCard) => void
 }) {
     return (
@@ -26,15 +23,14 @@ function PlayerArea({
             <h2>{player.name}{isActive ? ' — Your turn' : ''}</h2>
 
             <div className="player-area__content">
-                <button
+                <div
                     className="card-pile"
-                    onClick={onDraw}
-                    disabled={player.hand.length >= HAND_LIMIT}
-                    aria-label={`Draw a card for ${player.name}`}
+                    role="group"
+                    aria-label={`${player.name}'s draw deck`}
                 >
                     <span>Deck</span>
                     <strong>{player.deck.length}</strong>
-                </button>
+                </div>
 
                 <div
                     className="court-reserve"
@@ -90,10 +86,6 @@ function PlayerArea({
 function App() {
     const [game, setGame] = useState(createGame)
 
-    function handleDraw(playerId: Player['id']) {
-        setGame((currentGame) => drawForPlayer(currentGame, playerId))
-    }
-
     function handlePlay(card: TarotCard) {
         setGame((currentGame) => playCard(currentGame, card.id))
     }
@@ -116,7 +108,6 @@ function App() {
             <PlayerArea
                 player={game.opponent}
                 isActive={game.activePlayerId === 'opponent'}
-                onDraw={() => handleDraw('opponent')}
                 onPlay={handlePlay}
             />
 
@@ -136,7 +127,6 @@ function App() {
             <PlayerArea
                 player={game.player}
                 isActive={game.activePlayerId === 'player'}
-                onDraw={() => handleDraw('player')}
                 onPlay={handlePlay}
             />
         </main>
