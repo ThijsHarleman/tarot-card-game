@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { createDeck } from './createDeck'
+import { createPlayerDeck } from './createPlayerDeck'
 import { shuffleDeck } from './shuffleDeck'
 
 describe('shuffleDeck', () => {
     it('preserves every card exactly once', () => {
-        const deck = createDeck()
+        const deck = createPlayerDeck(['wands', 'cups'])
         const shuffled = shuffleDeck(deck)
 
         expect(shuffled).toHaveLength(deck.length)
@@ -14,7 +14,7 @@ describe('shuffleDeck', () => {
     })
 
     it('does not mutate the original deck', () => {
-        const deck = createDeck()
+        const deck = createPlayerDeck(['wands', 'cups'])
         const originalIds = deck.map((card) => card.id)
 
         shuffleDeck(deck)
@@ -23,7 +23,7 @@ describe('shuffleDeck', () => {
     })
 
     it('uses the supplied random-number generator', () => {
-        const deck = createDeck().slice(0, 3)
+        const deck = createPlayerDeck(['wands', 'cups']).slice(0, 3)
         const shuffled = shuffleDeck(deck, () => 0)
 
         expect(shuffled.map((card) => card.id)).toEqual([
@@ -38,7 +38,7 @@ describe('shuffleDeck', () => {
     })
 
     it('handles a deck with one card', () => {
-        const deck = [createDeck()[0]]
+        const deck = [createPlayerDeck(['wands', 'cups'])[0]]
 
         expect(shuffleDeck(deck)).toEqual(deck)
     })

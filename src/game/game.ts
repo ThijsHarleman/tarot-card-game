@@ -1,5 +1,5 @@
 import type { TarotCard } from './cards/card'
-import { createDeck } from './cards/createDeck'
+import { createPlayerDeck } from './cards/createPlayerDeck'
 import { shuffleDeck } from './cards/shuffleDeck'
 import { canPlayCard } from './cardRank'
 import { HAND_LIMIT } from './rules'
@@ -17,14 +17,14 @@ export function createGame(): GameState {
         player: {
             id: 'player',
             name: 'You',
-            deck: shuffleDeck(createDeck()),
+            deck: shuffleDeck(createPlayerDeck(['wands', 'cups'])),
             hand: [],
             discardPile: [],
         },
         opponent: {
             id: 'opponent',
             name: 'Opponent',
-            deck: shuffleDeck(createDeck()),
+            deck: shuffleDeck(createPlayerDeck(['swords', 'pentacles'])),
             hand: [],
             discardPile: [],
         },

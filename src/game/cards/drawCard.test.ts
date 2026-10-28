@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { createDeck } from './createDeck'
+import { createPlayerDeck } from './createPlayerDeck'
 import { drawCard } from './drawCard'
 
 describe('drawCard', () => {
     it('draws the top card and returns the remaining deck', () => {
-        const deck = createDeck()
+        const deck = createPlayerDeck(['wands', 'cups'])
         const result = drawCard(deck)
 
         expect(result.card?.id).toBe(deck[0].id)
@@ -15,7 +15,7 @@ describe('drawCard', () => {
     })
 
     it('does not mutate the original deck', () => {
-        const deck = createDeck()
+        const deck = createPlayerDeck(['wands', 'cups'])
         const originalIds = deck.map((card) => card.id)
 
         drawCard(deck)
@@ -31,7 +31,7 @@ describe('drawCard', () => {
     })
 
     it('draws the only card from a one-card deck', () => {
-        const deck = createDeck().slice(0, 1)
+        const deck = createPlayerDeck(['wands', 'cups']).slice(0, 1)
         const result = drawCard(deck)
 
         expect(result.card?.id).toBe(deck[0].id)

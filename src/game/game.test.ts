@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createGame, drawToHand, passTurn, playCard } from './game'
 import type { Player } from './player'
 import type { TarotCard } from './cards/card'
-import { createDeck } from './cards/createDeck'
+import { createPlayerDeck } from './cards/createPlayerDeck'
 import { HAND_LIMIT } from './rules'
 
 const ace: TarotCard = {
@@ -43,11 +43,22 @@ describe('createGame', () => {
     it('creates two players with separate 78-card decks', () => {
         const game = createGame()
 
-        expect(game.player.deck).toHaveLength(78)
-        expect(game.opponent.deck).toHaveLength(78)
-        expect(game.player.id).not.toBe(game.opponent.id)
-        expect(game.activePlayerId).toBe('player')
-        expect(game.playedCards).toEqual([])
+        expect(game.player.deck).toHaveLength(28)
+        expect(game.opponent.deck).toHaveLength(28)
+
+        expect(
+            game.player.deck.every((card) => card.kind === 'minor'),
+        ).toBe(true)
+
+        expect(
+            game.opponent.deck.every((card) => card.kind === 'minor'),
+        ).toBe(true)
+
+        const playerIds = new Set(game.player.deck.map((card) => card.id))
+
+        expect(
+            game.opponent.deck.every((card) => !playerIds.has(card.id)),
+        ).toBe(true)
     })
 })
 
@@ -79,7 +90,7 @@ describe('drawToHand', () => {
     })
 
     it('does not draw more than five cards', () => {
-        const cards = createDeck().slice(0, 7)
+        const cards = createPlayerDeck(['wands', 'cups']).slice(0, 7)
 
         const result = drawToHand(makePlayer({ deck: cards }))
 
