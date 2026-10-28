@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { createPlayerDeck } from './createPlayerDeck'
 
 describe('createPlayerDeck', () => {
-    it('creates 28 minor arcana cards for two suits', () => {
-        const deck = createPlayerDeck(['wands', 'cups'])
+    it('creates 10 minor arcana cards for 1 suit', () => {
+        const deck = createPlayerDeck('wands')
 
-        expect(deck).toHaveLength(20)
+        expect(deck).toHaveLength(10)
         expect(deck.every((card) => card.kind === 'minor')).toBe(true)
         expect(
             deck.every(
@@ -15,18 +15,14 @@ describe('createPlayerDeck', () => {
         ).toBe(true)
     })
 
-    it('includes every rank from both selected suits', () => {
-        const deck = createPlayerDeck(['wands', 'cups'])
+    it('includes every rank from the selected suit', () => {
+        const deck = createPlayerDeck('wands')
 
-        for (const suit of ['wands', 'cups'] as const) {
-            expect(
-                deck.filter((card) => card.kind === 'minor' && card.suit === suit),
-            ).toHaveLength(10)
-        }
+        expect(deck.filter((card) => card.suit === 'wands')).toHaveLength(10)
     })
 
     it('does not include Major Arcana', () => {
-        const deck = createPlayerDeck(['swords', 'pentacles'])
+        const deck = createPlayerDeck('swords')
 
         expect(deck.every((card) => card.kind === 'minor')).toBe(true)
     })

@@ -210,13 +210,13 @@ describe('App', () => {
             within(playerCourtCards).getAllByRole('button', {
                 name: /^play /i,
             }),
-        ).toHaveLength(8)
+        ).toHaveLength(4)
 
         expect(
             within(opponentCourtCards).getAllByRole('button', {
                 name: /^play /i,
             }),
-        ).toHaveLength(8)
+        ).toHaveLength(4)
 
         expect(
             screen.getByText(/no cards played yet/i),

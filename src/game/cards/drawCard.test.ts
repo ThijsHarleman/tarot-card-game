@@ -4,7 +4,7 @@ import { drawCard } from './drawCard'
 
 describe('drawCard', () => {
     it('draws the top card and returns the remaining deck', () => {
-        const deck = createPlayerDeck(['wands', 'cups'])
+        const deck = createPlayerDeck('wands')
         const result = drawCard(deck)
 
         expect(result.card?.id).toBe(deck[0].id)
@@ -15,7 +15,7 @@ describe('drawCard', () => {
     })
 
     it('does not mutate the original deck', () => {
-        const deck = createPlayerDeck(['wands', 'cups'])
+        const deck = createPlayerDeck('wands')
         const originalIds = deck.map((card) => card.id)
 
         drawCard(deck)
@@ -31,7 +31,7 @@ describe('drawCard', () => {
     })
 
     it('draws the only card from a one-card deck', () => {
-        const deck = createPlayerDeck(['wands', 'cups']).slice(0, 1)
+        const deck = createPlayerDeck('wands').slice(0, 1)
         const result = drawCard(deck)
 
         expect(result.card?.id).toBe(deck[0].id)

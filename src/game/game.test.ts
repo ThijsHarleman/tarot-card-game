@@ -41,14 +41,14 @@ function makePlayer(
 }
 
 describe('createGame', () => {
-    it('creates two players with separate 78-card decks', () => {
+    it('creates two players with separate decks', () => {
         const game = createGame()
 
-        expect(game.player.deck).toHaveLength(20)
-        expect(game.opponent.deck).toHaveLength(20)
+        expect(game.player.deck).toHaveLength(10)
+        expect(game.opponent.deck).toHaveLength(10)
 
-        expect(game.player.courtCards).toHaveLength(8)
-        expect(game.opponent.courtCards).toHaveLength(8)
+        expect(game.player.courtCards).toHaveLength(4)
+        expect(game.opponent.courtCards).toHaveLength(4)
 
         expect(
             game.player.deck.every((card) => card.kind === 'minor'),
@@ -94,7 +94,7 @@ describe('drawToHand', () => {
     })
 
     it('does not draw more than five cards', () => {
-        const cards = createPlayerDeck(['wands', 'cups']).slice(0, 7)
+        const cards = createPlayerDeck('wands').slice(0, 7)
 
         const result = drawToHand(makePlayer({ deck: cards }))
 
@@ -165,7 +165,7 @@ describe('playCard', () => {
 
         const result = playCard(game, courtCard.id)
 
-        expect(result.player.courtCards).toHaveLength(7)
+        expect(result.player.courtCards).toHaveLength(3)
         expect(result.player.courtCards).not.toContainEqual(courtCard)
         expect(result.playedCards).toContainEqual(courtCard)
         expect(result.activePlayerId).toBe('opponent')
