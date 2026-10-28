@@ -7,6 +7,7 @@ import { createGame, passTurn, playCard } from './game/game'
 import { calculateScore, getOwnedMajorArcana } from './game/score'
 import { randomStrategy } from './game/opponent/randomStrategy'
 import { executeOpponentDecision } from './game/opponent/executeDecision'
+import { CardBack } from './components/CardBack'
 import { PlayingCard } from './components/PlayingCard'
 
 function PlayerArea({
@@ -69,7 +70,7 @@ function PlayerArea({
                     </div>
 
                     <div
-                        className="court-reserve"
+                        className={`court-reserve${isHuman ? '' : ' court-reserve--opponent'}`}
                         role="group"
                         aria-label={`${player.name}'s court cards`}
                     >
@@ -101,26 +102,30 @@ function PlayerArea({
                         role="group"
                         aria-label={`${player.name}'s hand`}
                     >
-                        {player.hand.map((card, index) =>
-                            isHuman ? (
-                                <button
-                                    className="hand__card"
-                                    key={`${card.id}-${index}`}
-                                    onClick={() => onPlay(card)}
-                                    aria-label={`Play ${card.id}`}
-                                >
-                                    <PlayingCard card={card} />
-                                </button>
-                            ) : (
-                                <div
-                                    className="hand__card"
-                                    key={`${card.id}-${index}`}
-                                >
-                                    <PlayingCard card={card} />
-                                </div>
-                            ),
+                        {isHuman ? (
+                            <>
+                                {player.hand.map((card, index) => (
+                                    <button
+                                        className="hand__card"
+                                        key={`${card.id}-${index}`}
+                                        onClick={() => onPlay(card)}
+                                        aria-label={`Play ${card.id}`}
+                                    >
+                                        <PlayingCard card={card} />
+                                    </button>
+                                ))}
+
+                                {player.hand.length === 0 && (
+                                    <p>No cards in hand</p>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                {player.hand.map((card, index) => (
+                                    <CardBack key={`${card.id}-${index}`} index={index} />
+                                ))}
+                            </>
                         )}
-                        {player.hand.length === 0 && <p>No cards in hand</p>}
                     </div>
 
                     <div

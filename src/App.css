@@ -522,3 +522,80 @@ button:focus-visible {
         padding: 0.5rem;
     }
 }
+
+.hidden-hand-count {
+    align-self: center;
+    margin: 0;
+    opacity: 0.75;
+    font-style: italic;
+}
+
+/* Hidden opponent hand */
+.hand__card--hidden {
+    cursor: default;
+    pointer-events: none;
+    transition: none;
+}
+
+.hand__card--hidden:hover,
+.hand__card--hidden:focus-visible {
+    z-index: auto;
+    transform: none;
+}
+
+.card-back {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 190px;
+    padding: 8px;
+    border: 1px solid #c8b4e8;
+    border-radius: 10px;
+    background:
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 7px,
+            rgb(200 180 232 / 18%) 7px,
+            rgb(200 180 232 / 18%) 9px
+        ),
+        linear-gradient(145deg, #49365f, #211a2c);
+    box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+}
+
+.card-back__inner {
+    box-sizing: border-box;
+    min-height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(200 180 232 / 65%);
+    border-radius: 6px;
+}
+
+.card-back__symbol {
+    color: #e7ddf7;
+    font-size: 2.5rem;
+}
+
+/* Opponent court cards are visible but not interactive. */
+.court-reserve--opponent .court-reserve__card {
+    cursor: default;
+    pointer-events: none;
+    transition: none;
+}
+
+.court-reserve--opponent .court-reserve__card:hover,
+.court-reserve--opponent .court-reserve__card:focus-visible {
+    z-index: auto;
+    transform: none;
+}
+
+@media (max-width: 720px) {
+    .card-back {
+        min-height: 160px;
+    }
+
+    .card-back__inner {
+        min-height: 140px;
+    }
+}
