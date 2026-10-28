@@ -24,6 +24,47 @@
     font-size: clamp(1.6rem, 4vw, 2.5rem);
 }
 
+.game-header button,
+.pass-turn-button {
+    border: 1px solid #b9a7d9;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #49365f, #352945);
+    color: #f5efff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.game-header button {
+    padding: 0.65rem 1rem;
+}
+
+.pass-turn-button {
+    align-self: center;
+    justify-self: end;
+    padding: 1rem 1.5rem;
+    min-width: 140px;
+    min-height: 60px;
+    font-size: 1.1rem;
+    box-shadow: 3px 3px 0 #211a2c, 5px 5px 0 #66517d;
+}
+
+.game-header button:hover,
+.pass-turn-button:hover {
+    background: #5a4374;
+}
+
+.game-header button:active,
+.pass-turn-button:active {
+    transform: translateY(2px);
+}
+
+button:focus-visible {
+    outline: 2px solid #e7ddf7;
+    outline-offset: 3px;
+}
+
 .player-area,
 .play-area {
     min-width: 0;
@@ -77,189 +118,14 @@
     font: inherit;
 }
 
-.card-pile:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .card-pile--discard {
     border-color: #897b94;
     background: #2a242e;
     box-shadow: 3px 3px 0 #211a2c, 6px 6px 0 #55485e;
-    cursor: default;
 }
 
 .card-pile strong {
     font-size: 1.1rem;
-}
-
-.hand,
-.play-area__cards {
-    display: flex;
-    align-items: flex-start;
-    flex: 1;
-    gap: 0;
-    min-width: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 6px 8px 16px;
-}
-
-.hand {
-    justify-content: center;
-}
-
-.hand__card {
-    position: relative;
-    flex: 0 0 125px;
-    width: 125px;
-    padding: 0;
-    border: 0;
-    border-radius: 10px;
-    color: inherit;
-    background: transparent;
-    text-align: inherit;
-    cursor: pointer;
-    transition: transform 160ms ease;
-}
-
-.hand__card + .hand__card {
-    margin-left: -38px;
-}
-
-.hand__card:hover,
-.hand__card:focus-visible {
-    z-index: 2;
-    transform: translateY(-12px);
-}
-
-.hand__card:focus-visible {
-    outline: 2px solid #e7ddf7;
-    outline-offset: 3px;
-}
-
-.playing-card {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 190px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 8px;
-    border: 1px solid #b9a7d9;
-    border-radius: 10px;
-    background: linear-gradient(145deg, #352945, #211a2c);
-    color: #e7ddf7;
-    text-align: center;
-    box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
-}
-
-.playing-card__number {
-    color: #b9a7d9;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.playing-card__name {
-    margin: 16px 0;
-    color: #fff;
-    font-size: 1rem;
-    overflow-wrap: anywhere;
-}
-
-.playing-card__category {
-    color: #c4bfd0;
-    font-size: 0.7rem;
-}
-
-.play-area {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.play-area__cards {
-    align-items: center;
-    flex: 1;
-}
-
-.play-area__cards > div {
-    flex: 0 0 125px;
-    width: 125px;
-}
-
-.play-area__cards > div + div {
-    margin-left: -24px;
-}
-
-.empty-message,
-.hand > p,
-.play-area__cards > p {
-    color: #c4bfd0;
-    font-size: 0.9rem;
-}
-
-button:focus-visible {
-    outline: 2px solid #e7ddf7;
-    outline-offset: 3px;
-}
-
-@media (max-width: 720px) {
-    .game-table {
-        grid-template-rows: auto minmax(150px, auto) minmax(150px, auto) minmax(150px, auto);
-        gap: 0.5rem;
-        padding: 0.75rem 0.5rem;
-    }
-
-    .player-area,
-    .play-area {
-        padding: 0.65rem;
-    }
-
-    .player-area__content {
-        gap: 0.5rem;
-    }
-
-    .card-pile {
-        flex-basis: 56px;
-        min-height: 84px;
-        padding: 0.25rem;
-        font-size: 0.8rem;
-    }
-
-    .hand {
-        justify-content: flex-start;
-    }
-
-    .hand__card {
-        flex-basis: 110px;
-        width: 110px;
-    }
-
-    .hand__card + .hand__card {
-        margin-left: -46px;
-    }
-
-    .play-area__cards > div {
-        flex-basis: 110px;
-        width: 110px;
-    }
-
-    .play-area__cards > div + div {
-        margin-left: -32px;
-    }
-
-    .playing-card {
-        min-height: 160px;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .hand__card {
-        transition: none;
-    }
 }
 
 .court-reserve {
@@ -299,7 +165,190 @@ button:focus-visible {
     transform: translateY(-8px);
 }
 
+.hand {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+    gap: 0;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px 8px 16px;
+}
+
+.hand__card {
+    position: relative;
+    flex: 0 0 125px;
+    width: 125px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    color: inherit;
+    background: transparent;
+    text-align: inherit;
+    cursor: pointer;
+    transition: transform 160ms ease;
+}
+
+.hand__card + .hand__card {
+    margin-left: -38px;
+}
+
+.hand__card:hover,
+.hand__card:focus-visible {
+    z-index: 2;
+    transform: translateY(-12px);
+}
+
+.playing-card {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    border: 1px solid #b9a7d9;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #352945, #211a2c);
+    color: #e7ddf7;
+    text-align: center;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+}
+
+.playing-card__number {
+    color: #b9a7d9;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.playing-card__name {
+    margin: 16px 0;
+    color: #fff;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.playing-card__category {
+    color: #c4bfd0;
+    font-size: 0.7rem;
+}
+
+.play-area {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.current-prize {
+    min-width: 0;
+}
+
+.bidding-area {
+    min-width: 0;
+}
+
+.major-arcana-card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 150px;
+    min-height: 220px;
+    padding: 1rem;
+    border: 2px solid #c8b4e8;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #352945, #211a2c);
+    color: #e7ddf7;
+    text-align: center;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+}
+
+.major-arcana-number {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.played-cards {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.played-card {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 100px;
+    min-height: 140px;
+    padding: 0.75rem;
+    border: 1px solid #b9a7d9;
+    border-radius: 8px;
+    background: #2a2235;
+    color: #e7ddf7;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.empty-message,
+.hand > p,
+.played-cards > p {
+    color: #c4bfd0;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+    .play-area {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    .pass-turn-button {
+        grid-column: 2;
+        justify-self: end;
+    }
+}
+
 @media (max-width: 720px) {
+    .game-table {
+        grid-template-rows: auto minmax(150px, auto) minmax(150px, auto) minmax(150px, auto);
+        gap: 0.5rem;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .game-header {
+        flex-wrap: wrap;
+    }
+
+    .game-header button {
+        padding: 0.55rem 0.75rem;
+    }
+
+    .player-area,
+    .play-area {
+        padding: 0.65rem;
+    }
+
+    .player-area__content {
+        gap: 0.5rem;
+    }
+
+    .card-pile {
+        flex-basis: 56px;
+        min-height: 84px;
+        padding: 0.25rem;
+        font-size: 0.8rem;
+    }
+
     .court-reserve {
         max-width: 25%;
         gap: 4px;
@@ -317,10 +366,58 @@ button:focus-visible {
     .court-reserve__card .playing-card__name {
         font-size: 0.7rem;
     }
+
+    .hand {
+        justify-content: flex-start;
+    }
+
+    .hand__card {
+        flex-basis: 110px;
+        width: 110px;
+    }
+
+    .hand__card + .hand__card {
+        margin-left: -46px;
+    }
+
+    .playing-card {
+        min-height: 160px;
+    }
+
+    .play-area {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    .major-arcana-card {
+        width: 130px;
+        min-height: 170px;
+    }
+
+    .bidding-area,
+    .current-prize {
+        min-width: 0;
+    }
+
+    .pass-turn-button {
+        grid-column: 1;
+        justify-self: stretch;
+        width: 100%;
+        min-height: 56px;
+    }
+
+    .played-card {
+        flex-basis: 80px;
+        min-height: 115px;
+        padding: 0.5rem;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .court-reserve__card {
+    .hand__card,
+    .court-reserve__card,
+    .game-header button,
+    .pass-turn-button {
         transition: none;
     }
 }

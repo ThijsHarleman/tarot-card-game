@@ -102,7 +102,9 @@ function App() {
         <main className="game-table">
             <header className="game-header">
                 <h1>Tarot Card Game</h1>
-                <button onClick={handleReset}>New game</button>
+                <button className="new-game-button" onClick={handleReset}>
+                    New game
+                </button>
             </header>
 
             <PlayerArea
@@ -111,17 +113,48 @@ function App() {
                 onPlay={handlePlay}
             />
 
-            <section className="play-area" aria-label="Cards played this round">
-                <h2>Cards played this round</h2>
-                <div className="play-area__cards">
-                    {game.playedCards.map((card, index) => (
-                        <div key={`${card.id}-${index}`}>
-                            <PlayingCard card={card} />
-                        </div>
-                    ))}
-                    {game.playedCards.length === 0 && <p>No cards played yet</p>}
+            <section className="play-area" aria-label="Auction area">
+                <div
+                    className="current-prize"
+                    role="group"
+                    aria-label="Current Major Arcana prize"
+                >
+                    <h2>Prize</h2>
+                    <div className="major-arcana-card">
+                        <span className="major-arcana-number">
+                            {game.currentMajorArcana.number}
+                        </span>
+                        <strong>{game.currentMajorArcana.name}</strong>
+                    </div>
                 </div>
-                <button onClick={handlePass}>Pass turn</button>
+
+                <div
+                    className="bidding-area"
+                    role="group"
+                    aria-label="Cards played this round"
+                >
+                    <h2>Bids</h2>
+                    <div className="played-cards">
+                        {game.playedCards.map((card) => (
+                            <div className="played-card" key={card.id}>
+                                {card.kind === 'major' ? (
+                                    <strong>{card.name}</strong>
+                                ) : (
+                                    <span>
+                                        {card.rank} of {card.suit}
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+
+                        {game.playedCards.length === 0 && (
+                            <p>No bids yet</p>
+                        )}
+                    </div>
+                </div>
+                <button className="pass-turn-button" onClick={handlePass}>
+                    Pass turn
+                </button>
             </section>
 
             <PlayerArea

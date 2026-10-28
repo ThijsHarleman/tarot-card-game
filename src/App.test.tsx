@@ -244,4 +244,16 @@ describe('App', () => {
             }),
         ).toBeInTheDocument()
     })
+
+    it('displays The Fool as the opening auction prize', () => {
+        render(<App />)
+
+        expect(
+            screen.getByRole('group', { name: 'Current Major Arcana prize' }),
+        ).toHaveTextContent('The Fool')
+
+        expect(
+            screen.getByRole('group', { name: 'Cards played this round' }),
+        ).toHaveTextContent('No bids yet')
+    })
 })

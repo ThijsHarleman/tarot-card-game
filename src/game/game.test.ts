@@ -99,6 +99,17 @@ describe('createGame', () => {
         expect(game.activePlayerId).toBe('player')
         expect(game.playedCards).toEqual([])
     })
+
+    it('starts the first auction with The Fool', () => {
+        const game = createGame()
+
+        expect(game.currentMajorArcana).toEqual({
+            kind: 'major',
+            id: 'major-0',
+            name: 'The Fool',
+            number: 0,
+        })
+    })
 })
 
 describe('drawToHand', () => {
@@ -283,5 +294,34 @@ describe('passTurn', () => {
         expect(result.player.deck).toEqual([])
         expect(result.player.discardPile).toEqual([])
         expect(result.activePlayerId).toBe('player')
+    })
+
+    it('awards the current Major Arcana to the player who did not pass', () => {
+        const game = createGame()
+        const result = passTurn({
+            ...game,
+            activePlayerId: 'player',
+            playedCards: [three],
+        })
+
+        expect(result.player.discardPile).toContainEqual(three)
+        expect(result.opponent.discardPile).toContainEqual(game.currentMajorArcana)
+        expect(result.playedCards).toEqual([])
+        expect(result.activePlayerId).toBe('player')
+        expect(result.currentMajorArcana.name).toBe('The Magician')
+    })
+
+    it('awards the prize to the player and keeps the passer active', () => {
+        const game = createGame()
+        const result = passTurn({
+            ...game,
+            activePlayerId: 'opponent',
+            playedCards: [three],
+        })
+
+        expect(result.opponent.discardPile).toContainEqual(three)
+        expect(result.player.discardPile).toContainEqual(game.currentMajorArcana)
+        expect(result.activePlayerId).toBe('opponent')
+        expect(result.currentMajorArcana.name).toBe('The Magician')
     })
 })

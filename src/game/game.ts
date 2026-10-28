@@ -1,6 +1,9 @@
 import type { TarotCard } from './cards/card'
+import { MAJOR_ARCANA } from './cards/card'
+import type { MajorArcanaCard } from './cards/card'
 import { createPlayerCourtCards } from './cards/createPlayerCourtCards'
 import { createPlayerDeck } from './cards/createPlayerDeck'
+import { getNextMajorArcana } from './cards/getNextMajorArcana'
 import { shuffleDeck } from './cards/shuffleDeck'
 import { canPlayCard } from './cardRank'
 import { HAND_LIMIT } from './rules'
@@ -11,6 +14,8 @@ export interface GameState {
     readonly opponent: Player
     readonly activePlayerId: Player['id']
     readonly playedCards: TarotCard[]
+    readonly currentMajorArcana: MajorArcanaCard
+    readonly isGameOver: boolean
 }
 
 export function createGame(): GameState {
@@ -33,12 +38,29 @@ export function createGame(): GameState {
         },
         activePlayerId: 'player',
         playedCards: [],
+        currentMajorArcana: createMajorArcanaCard(0),
+        isGameOver: false
     }
 
     return drawForPlayer(
         drawForPlayer(initialState, 'player'),
         'opponent',
     )
+}
+
+function createMajorArcanaCard(number: number): MajorArcanaCard {
+    const name = MAJOR_ARCANA[number]
+
+    if (name === undefined) {
+        throw new RangeError(`Invalid Major Arcana number: ${number}`)
+    }
+
+    return {
+        kind: 'major',
+        id: `major-${number}`,
+        name,
+        number,
+    }
 }
 
 function updatePlayer(
@@ -129,20 +151,47 @@ export function playCard(
 
 /** Passes the turn and moves all played cards into the passing player's discard pile. */
 export function passTurn(state: GameState): GameState {
-    const player = getPlayer(state, state.activePlayerId)
+    const passingPlayerId = state.activePlayerId
+    const winnerId = passingPlayerId === 'player' ? 'opponent' : 'player'
 
-    const updatedPlayer: Player = {
-        ...player,
-        discardPile: [...player.discardPile, ...state.playedCards],
+    const passingPlayer = getPlayer(state, passingPlayerId)
+    const winner = getPlayer(state, winnerId)
+
+    const updatedPassingPlayer: Player = {
+        ...passingPlayer,
+        discardPile: [
+            ...passingPlayer.discardPile,
+            ...state.playedCards,
+        ],
     }
+
+    const updatedWinner: Player = {
+        ...winner,
+        discardPile: [
+            ...winner.discardPile,
+            state.currentMajorArcana,
+        ],
+    }
+
+    const stateWithDiscard = updatePlayer(
+        updatePlayer(state, updatedPassingPlayer),
+        updatedWinner,
+    )
+
+    const nextMajorArcana = getNextMajorArcana(state.currentMajorArcana)
 
     const nextState: GameState = {
-        ...updatePlayer(state, updatedPlayer),
+        ...stateWithDiscard,
         playedCards: [],
+        currentMajorArcana: nextMajorArcana ?? state.currentMajorArcana,
+        isGameOver: nextMajorArcana === undefined,
+        activePlayerId: passingPlayerId,
     }
 
-    // Refill both hands for the next round.
-    // The player who passed remains the starting player.
+    if (nextState.isGameOver) {
+        return nextState
+    }
+
     return drawForPlayer(
         drawForPlayer(nextState, 'player'),
         'opponent',
