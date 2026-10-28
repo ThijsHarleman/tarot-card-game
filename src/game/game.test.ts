@@ -324,4 +324,12 @@ describe('passTurn', () => {
         expect(result.activePlayerId).toBe('opponent')
         expect(result.currentMajorArcana.name).toBe('The Magician')
     })
+
+    it('does not allow a player to pass before any cards are bid', () => {
+        const state = createGame()
+
+        const nextState = passTurn(state)
+
+        expect(nextState).toBe(state)
+    })
 })

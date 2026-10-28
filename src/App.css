@@ -51,13 +51,22 @@
 }
 
 .game-header button:hover,
-.pass-turn-button:hover {
+.pass-turn-button:not(:disabled):hover {
     background: #5a4374;
 }
 
 .game-header button:active,
-.pass-turn-button:active {
+.pass-turn-button:not(:disabled):active {
     transform: translateY(2px);
+}
+
+.pass-turn-button:disabled {
+    background: #302a38;
+    border-color: #62586d;
+    color: #91899a;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 button:focus-visible {

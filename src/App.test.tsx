@@ -58,6 +58,14 @@ describe('App', () => {
         ).not.toBeInTheDocument()
     })
 
+    it('disables passing when no cards have been bid', () => {
+        render(<App />)
+
+        expect(
+            screen.getByRole('button', { name: /pass turn/i }),
+        ).toBeDisabled()
+    })
+
     it('plays a legal card and switches the active player', async () => {
         const user = userEvent.setup()
         render(<App />)
@@ -264,14 +272,53 @@ describe('App', () => {
             screen.queryByRole('heading', { name: 'Game over' }),
         ).not.toBeInTheDocument()
 
-        // The player remains active after passing, so passing through
-        // all 22 prizes ends the game.
-        const passButton = screen.getByRole('button', {
-            name: /pass turn/i,
-        })
-
+        // Each round must contain at least one legal bid before passing.
         for (let round = 0; round < 22; round += 1) {
-            await user.click(passButton)
+            const activeHeading = screen.getByRole('heading', {
+                name: /— Your turn$/,
+            })
+
+            const activePlayerName = activeHeading.textContent?.replace(
+                ' — Your turn',
+                '',
+            )
+
+            if (!activePlayerName) {
+                throw new Error('Could not determine the active player.')
+            }
+
+            const activePlayerArea = screen.getByRole('region', {
+                name: activePlayerName,
+            })
+
+            const hand = within(activePlayerArea).getByRole('group', {
+                name: `${activePlayerName}'s hand`,
+            })
+
+            const handCards = within(hand).queryAllByRole('button', {
+                name: /^play /i,
+            })
+
+            if (handCards.length > 0) {
+                await user.click(handCards[0])
+            } else {
+                const courtReserve = within(activePlayerArea).getByRole(
+                    'group',
+                    { name: `${activePlayerName}'s court cards` },
+                )
+
+                const courtCards = within(courtReserve).queryAllByRole(
+                    'button',
+                    { name: /^play /i },
+                )
+
+                expect(courtCards.length).toBeGreaterThan(0)
+                await user.click(courtCards[0])
+            }
+
+            await user.click(
+                screen.getByRole('button', { name: /pass turn/i }),
+            )
         }
 
         expect(
@@ -282,19 +329,29 @@ describe('App', () => {
             screen.getByRole('heading', { name: 'Final scores' }),
         ).toBeInTheDocument()
 
-        // With no bids, the opponent receives every prize.
-        // The sum of Major Arcana values 0 through 21 is 231.
-        expect(screen.getByText('You lose.')).toBeInTheDocument()
+        expect(
+            screen.getByText(/^(You win!|You lose\.)$/),
+        ).toBeInTheDocument()
 
         const results = screen.getByRole('region', {
             name: 'Game results',
         })
 
-        expect(within(results).getByText('231')).toBeInTheDocument()
-        expect(within(results).getByText('0')).toBeInTheDocument()
+        const playerScore = Number(
+            within(results)
+                .getByText('You', { selector: 'span' })
+                .parentElement?.querySelector('strong')?.textContent,
+        )
 
-        // Each player's result area shows their currently owned
-        // Major Arcana cards, not their other card zones.
+        const opponentScore = Number(
+            within(results)
+                .getByText('Opponent', { selector: 'span' })
+                .parentElement?.querySelector('strong')?.textContent,
+        )
+
+        // All Major Arcana values (0 through 21) total 231 points.
+        expect(playerScore + opponentScore).toBe(231)
+
         const opponentArea = screen.getByRole('region', {
             name: 'Opponent',
         })
@@ -302,23 +359,24 @@ describe('App', () => {
             name: 'You',
         })
 
-        expect(
-            within(opponentArea).getByRole('group', {
-                name: "Opponent's Major Arcana",
-            }),
-        ).toHaveTextContent('The Fool')
+        const opponentMajorArcana = within(opponentArea).getByRole('group', {
+            name: "Opponent's Major Arcana",
+        })
 
-        expect(
-            within(opponentArea).getByRole('group', {
-                name: "Opponent's Major Arcana",
-            }),
-        ).toHaveTextContent('The World')
+        const playerMajorArcana = within(playerArea).getByRole('group', {
+            name: "You's Major Arcana",
+        })
 
-        expect(
-            within(playerArea).getByRole('group', {
-                name: "You's Major Arcana",
-            }),
-        ).toHaveTextContent('No Major Arcana owned')
+        const displayedMajorArcanaCount =
+            opponentMajorArcana.querySelectorAll(
+                '.owned-major-arcana__card',
+            ).length +
+            playerMajorArcana.querySelectorAll(
+                '.owned-major-arcana__card',
+            ).length
+
+        // Every Major Arcana must belong to exactly one player at game end.
+        expect(displayedMajorArcanaCount).toBe(22)
 
         expect(
             within(opponentArea).queryByRole('group', {

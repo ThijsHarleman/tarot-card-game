@@ -227,6 +227,7 @@ function App() {
                     <button
                         className="pass-turn-button"
                         onClick={handlePass}
+                        disabled={game.playedCards.length === 0}
                     >
                         Pass turn
                     </button>

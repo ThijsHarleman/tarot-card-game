@@ -151,6 +151,10 @@ export function playCard(
 
 /** Passes the turn and moves all played cards into the passing player's discard pile. */
 export function passTurn(state: GameState): GameState {
+    if (state.playedCards.length === 0) {
+        return state
+    }
+
     const passingPlayerId = state.activePlayerId
     const winnerId = passingPlayerId === 'player' ? 'opponent' : 'player'
 
