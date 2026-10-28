@@ -34,6 +34,7 @@ function makePlayer(
         name: 'You',
         deck: [],
         hand: [],
+        courtCards: [],
         discardPile: [],
         ...overrides,
     }
@@ -43,8 +44,11 @@ describe('createGame', () => {
     it('creates two players with separate 78-card decks', () => {
         const game = createGame()
 
-        expect(game.player.deck).toHaveLength(28)
-        expect(game.opponent.deck).toHaveLength(28)
+        expect(game.player.deck).toHaveLength(20)
+        expect(game.opponent.deck).toHaveLength(20)
+
+        expect(game.player.courtCards).toHaveLength(8)
+        expect(game.opponent.courtCards).toHaveLength(8)
 
         expect(
             game.player.deck.every((card) => card.kind === 'minor'),
@@ -149,6 +153,21 @@ describe('playCard', () => {
         const result = playCard(state, ace.id)
 
         expect(result.playedCards).toEqual([three, ace])
+        expect(result.activePlayerId).toBe('opponent')
+    })
+
+    it('plays a court card directly from the reserve', () => {
+        const game = createGame()
+        const courtCard = game.player.courtCards[0]
+
+        expect(courtCard).toBeDefined()
+        if (courtCard === undefined) return
+
+        const result = playCard(game, courtCard.id)
+
+        expect(result.player.courtCards).toHaveLength(7)
+        expect(result.player.courtCards).not.toContainEqual(courtCard)
+        expect(result.playedCards).toContainEqual(courtCard)
         expect(result.activePlayerId).toBe('opponent')
     })
 })

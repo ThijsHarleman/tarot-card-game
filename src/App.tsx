@@ -36,7 +36,31 @@ function PlayerArea({
                     <strong>{player.deck.length}</strong>
                 </button>
 
-                <div className="hand">
+                <div
+                    className="court-reserve"
+                    role="group"
+                    aria-label={`${player.name}'s court cards`}
+                >
+                    {player.courtCards.map((card) => (
+                        <button
+                            className="court-reserve__card"
+                            key={card.id}
+                            onClick={() => onPlay(card)}
+                            aria-label={`Play ${card.id}`}
+                        >
+                            <PlayingCard card={card} />
+                        </button>
+                    ))}
+                    {player.courtCards.length === 0 && (
+                        <p className="empty-message">No court cards remaining</p>
+                    )}
+                </div>
+
+                <div
+                    className="hand"
+                    role="group"
+                    aria-label={`${player.name}'s hand`}
+                >
                     {player.hand.map((card, index) => (
                         <button
                             className="hand__card"
@@ -50,7 +74,11 @@ function PlayerArea({
                     {player.hand.length === 0 && <p>No cards in hand</p>}
                 </div>
 
-                <div className="card-pile card-pile--discard" aria-label="Discard pile">
+                <div
+                    className="card-pile card-pile--discard"
+                    role="group"
+                    aria-label={`${player.name}'s discard pile`}
+                >
                     <span>Discard</span>
                     <strong>{player.discardPile.length}</strong>
                 </div>

@@ -6,7 +6,7 @@ describe('createPlayerDeck', () => {
     it('creates 28 minor arcana cards for two suits', () => {
         const deck = createPlayerDeck(['wands', 'cups'])
 
-        expect(deck).toHaveLength(28)
+        expect(deck).toHaveLength(20)
         expect(deck.every((card) => card.kind === 'minor')).toBe(true)
         expect(
             deck.every(
@@ -21,7 +21,7 @@ describe('createPlayerDeck', () => {
         for (const suit of ['wands', 'cups'] as const) {
             expect(
                 deck.filter((card) => card.kind === 'minor' && card.suit === suit),
-            ).toHaveLength(14)
+            ).toHaveLength(10)
         }
     })
 

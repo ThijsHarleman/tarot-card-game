@@ -5,5 +5,6 @@ export interface Player {
     readonly name: string
     readonly deck: TarotCard[]
     readonly hand: TarotCard[]
+    readonly courtCards: TarotCard[]
     readonly discardPile: TarotCard[]
 }

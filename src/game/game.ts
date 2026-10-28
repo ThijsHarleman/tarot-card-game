@@ -1,4 +1,5 @@
 import type { TarotCard } from './cards/card'
+import { createPlayerCourtCards } from './cards/createPlayerCourtCards'
 import { createPlayerDeck } from './cards/createPlayerDeck'
 import { shuffleDeck } from './cards/shuffleDeck'
 import { canPlayCard } from './cardRank'
@@ -19,6 +20,7 @@ export function createGame(): GameState {
             name: 'You',
             deck: shuffleDeck(createPlayerDeck(['wands', 'cups'])),
             hand: [],
+            courtCards: createPlayerCourtCards(['wands', 'cups']),
             discardPile: [],
         },
         opponent: {
@@ -26,6 +28,7 @@ export function createGame(): GameState {
             name: 'Opponent',
             deck: shuffleDeck(createPlayerDeck(['swords', 'pentacles'])),
             hand: [],
+            courtCards: createPlayerCourtCards(['swords', 'pentacles']),
             discardPile: [],
         },
         activePlayerId: 'player',
@@ -97,16 +100,17 @@ export function playCard(
     cardId: string,
 ): GameState {
     const player = getPlayer(state, state.activePlayerId)
-    const card = player.hand.find((item) => item.id === cardId)
+    const handCard = player.hand.find((item) => item.id === cardId)
+    const courtCard = player.courtCards.find((item) => item.id === cardId)
+    const card = handCard ?? courtCard
     const previousCard = state.playedCards.at(-1)
 
-    if (card === undefined || !canPlayCard(card, previousCard)) {
-        return state
-    }
+    if (card === undefined || !canPlayCard(card, previousCard)) return state
 
     const updatedPlayer: Player = {
         ...player,
         hand: player.hand.filter((item) => item.id !== cardId),
+        courtCards: player.courtCards.filter((item) => item.id !== cardId),
     }
 
     const updatedState = updatePlayer(state, updatedPlayer)

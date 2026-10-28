@@ -262,3 +262,66 @@ button:focus-visible {
         transition: none;
     }
 }
+
+.court-reserve {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    flex: 0 0 auto;
+    max-width: 30%;
+    overflow-x: auto;
+    padding: 6px 4px 16px;
+}
+
+.court-reserve__card {
+    flex: 0 0 76px;
+    width: 76px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: transform 160ms ease;
+}
+
+.court-reserve__card .playing-card {
+    min-height: 130px;
+    padding: 8px 4px;
+}
+
+.court-reserve__card .playing-card__name {
+    margin: 8px 0;
+    font-size: 0.8rem;
+}
+
+.court-reserve__card:hover,
+.court-reserve__card:focus-visible {
+    z-index: 2;
+    transform: translateY(-8px);
+}
+
+@media (max-width: 720px) {
+    .court-reserve {
+        max-width: 25%;
+        gap: 4px;
+    }
+
+    .court-reserve__card {
+        flex-basis: 58px;
+        width: 58px;
+    }
+
+    .court-reserve__card .playing-card {
+        min-height: 100px;
+    }
+
+    .court-reserve__card .playing-card__name {
+        font-size: 0.7rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .court-reserve__card {
+        transition: none;
+    }
+}
