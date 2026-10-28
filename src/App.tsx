@@ -1,21 +1,25 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import type { Player } from './game/player'
 import type { TarotCard } from './game/cards/card'
 import { createGame, passTurn, playCard } from './game/game'
 import { calculateScore, getOwnedMajorArcana } from './game/score'
+import { randomStrategy } from './game/opponent/randomStrategy'
+import { executeOpponentDecision } from './game/opponent/executeDecision'
 import { PlayingCard } from './components/PlayingCard'
 
 function PlayerArea({
     player,
     isActive,
     isGameOver,
+    isHuman,
     onPlay,
 }: {
     player: Player
     isActive: boolean
     isGameOver: boolean
+    isHuman: boolean
     onPlay: (card: TarotCard) => void
 }) {
     const ownedMajorArcana = isGameOver
@@ -69,16 +73,22 @@ function PlayerArea({
                         role="group"
                         aria-label={`${player.name}'s court cards`}
                     >
-                        {player.courtCards.map((card) => (
-                            <button
-                                className="court-reserve__card"
-                                key={card.id}
-                                onClick={() => onPlay(card)}
-                                aria-label={`Play ${card.id}`}
-                            >
-                                <PlayingCard card={card} />
-                            </button>
-                        ))}
+                        {player.courtCards.map((card) =>
+                            isHuman ? (
+                                <button
+                                    className="court-reserve__card"
+                                    key={card.id}
+                                    onClick={() => onPlay(card)}
+                                    aria-label={`Play ${card.id}`}
+                                >
+                                    <PlayingCard card={card} />
+                                </button>
+                            ) : (
+                                <div className="court-reserve__card" key={card.id}>
+                                    <PlayingCard card={card} />
+                                </div>
+                            ),
+                        )}
                         {player.courtCards.length === 0 && (
                             <p className="empty-message">
                                 No court cards remaining
@@ -91,16 +101,25 @@ function PlayerArea({
                         role="group"
                         aria-label={`${player.name}'s hand`}
                     >
-                        {player.hand.map((card, index) => (
-                            <button
-                                className="hand__card"
-                                key={`${card.id}-${index}`}
-                                onClick={() => onPlay(card)}
-                                aria-label={`Play ${card.id}`}
-                            >
-                                <PlayingCard card={card} />
-                            </button>
-                        ))}
+                        {player.hand.map((card, index) =>
+                            isHuman ? (
+                                <button
+                                    className="hand__card"
+                                    key={`${card.id}-${index}`}
+                                    onClick={() => onPlay(card)}
+                                    aria-label={`Play ${card.id}`}
+                                >
+                                    <PlayingCard card={card} />
+                                </button>
+                            ) : (
+                                <div
+                                    className="hand__card"
+                                    key={`${card.id}-${index}`}
+                                >
+                                    <PlayingCard card={card} />
+                                </div>
+                            ),
+                        )}
                         {player.hand.length === 0 && <p>No cards in hand</p>}
                     </div>
 
@@ -153,6 +172,18 @@ function GameResults({
 function App() {
     const [game, setGame] = useState(createGame)
 
+    useEffect(() => {
+        if (game.isGameOver || game.activePlayerId !== 'opponent') {
+            return
+        }
+
+        const decision = randomStrategy.chooseAction(game)
+
+        setGame((currentGame) =>
+            executeOpponentDecision(currentGame, decision),
+        )
+    }, [game])
+
     function handlePlay(card: TarotCard) {
         setGame((currentGame) => playCard(currentGame, card.id))
     }
@@ -178,6 +209,7 @@ function App() {
                 player={game.opponent}
                 isActive={game.activePlayerId === 'opponent'}
                 isGameOver={game.isGameOver}
+                isHuman={false}
                 onPlay={handlePlay}
             />
 
@@ -238,6 +270,7 @@ function App() {
                 player={game.player}
                 isActive={game.activePlayerId === 'player'}
                 isGameOver={game.isGameOver}
+                isHuman={true}
                 onPlay={handlePlay}
             />
         </main>

@@ -1,7 +1,33 @@
-import { render, screen, within } from '@testing-library/react'
+
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { getLegalCards } from './game/game'
+import { randomStrategy } from './game/opponent/randomStrategy'
+
+vi.spyOn(randomStrategy, 'chooseAction').mockImplementation((state) => {
+    const legalCards = getLegalCards(state)
+    const card = legalCards[0]
+
+    if (card === undefined) {
+        return { type: 'pass' }
+    }
+
+    return { type: 'play', cardId: card.id }
+})
+
+beforeEach(() => {
+    vi.clearAllMocks()
+
+    vi.mocked(randomStrategy.chooseAction).mockImplementation((state) => {
+        const card = getLegalCards(state)[0]
+
+        return card === undefined
+            ? { type: 'pass' }
+            : { type: 'play', cardId: card.id }
+    })
+})
 
 describe('App', () => {
     it('shows both players, the play area, and a new-game button', () => {
@@ -47,11 +73,12 @@ describe('App', () => {
             within(playerHand).getAllByRole('button', { name: /^play /i }),
         ).toHaveLength(5)
 
+        // The opponent's cards are not playable by the human.
         expect(
-            within(opponentHand).getAllByRole('button', {
+            within(opponentHand).queryAllByRole('button', {
                 name: /^play /i,
             }),
-        ).toHaveLength(5)
+        ).toHaveLength(0)
 
         expect(
             screen.queryByRole('button', { name: /draw a card/i }),
@@ -66,7 +93,7 @@ describe('App', () => {
         ).toBeDisabled()
     })
 
-    it('plays a legal card and switches the active player', async () => {
+    it('plays a legal card and lets the opponent respond automatically', async () => {
         const user = userEvent.setup()
         render(<App />)
 
@@ -75,103 +102,87 @@ describe('App', () => {
             name: "You's hand",
         })
 
-        const cards = within(playerHand).getAllByRole('button', {
-            name: /^play /i,
+        await user.click(
+            within(playerHand).getAllByRole('button', {
+                name: /^play /i,
+            })[0],
+        )
+
+        // The opponent automatically plays a legal card.
+        await waitFor(() => {
+            const playArea = screen.getByRole('group', {
+                name: 'Cards played this round',
+            })
+
+            expect(
+                playArea.querySelectorAll('.played-card'),
+            ).toHaveLength(2)
         })
-
-        // The first card is legal because the play area is empty.
-        await user.click(cards[0])
-
-        const playArea = screen.getByRole('group', {
-            name: 'Cards played this round',
-        })
-
-        expect(playArea.querySelectorAll('.played-card')).toHaveLength(1)
 
         expect(
             screen.getByRole('heading', {
-                name: /opponent — your turn/i,
+                name: /you — your turn/i,
             }),
         ).toBeInTheDocument()
 
-        // Playing a card removes it from the hand.
         expect(
-            within(playerHand).getAllByRole('button', { name: /^play /i }),
+            within(playerHand).getAllByRole('button', {
+                name: /^play /i,
+            }),
         ).toHaveLength(4)
 
-        // Drawing is not available during a round.
         expect(
             screen.queryByRole('button', { name: /draw a card/i }),
         ).not.toBeInTheDocument()
     })
 
-    it('ends the round and gives the next round to the passing player', async () => {
+    it('ends the round when the human passes', async () => {
         const user = userEvent.setup()
         render(<App />)
 
         const playerArea = screen.getByRole('region', { name: 'You' })
-        const opponentArea = screen.getByRole('region', {
-            name: 'Opponent',
-        })
-
         const playerHand = within(playerArea).getByRole('group', {
             name: "You's hand",
         })
-        const opponentHand = within(opponentArea).getByRole('group', {
-            name: "Opponent's hand",
+
+        await user.click(
+            within(playerHand).getAllByRole('button', {
+                name: /^play /i,
+            })[0],
+        )
+
+        // Wait for the opponent to respond and the turn to return to the human.
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', {
+                    name: /you — your turn/i,
+                }),
+            ).toBeInTheDocument()
         })
-
-        // You play a card, making the opponent active.
-        const firstPlayerCard = within(playerHand).getAllByRole('button', {
-            name: /^play /i,
-        })[0]
-
-        await user.click(firstPlayerCard)
-
-        expect(
-            screen.getByRole('heading', {
-                name: /opponent — your turn/i,
-            }),
-        ).toBeInTheDocument()
 
         const playArea = screen.getByRole('group', {
             name: 'Cards played this round',
         })
 
-        expect(playArea.querySelectorAll('.played-card')).toHaveLength(1)
+        expect(playArea.querySelectorAll('.played-card')).toHaveLength(2)
 
-        // The opponent passes, ending the round.
         await user.click(
             screen.getByRole('button', { name: /pass turn/i }),
         )
 
-        // Played cards are cleared from the play area.
         expect(playArea.querySelectorAll('.played-card')).toHaveLength(0)
 
-        // The played card goes into the passing opponent's discard pile.
-        const opponentDiscardPile = within(opponentArea).getByRole('group', {
-            name: "Opponent's discard pile",
+        // The human passed, so the human receives the played cards.
+        const playerDiscardPile = within(playerArea).getByRole('group', {
+            name: "You's discard pile",
         })
 
-        expect(
-            within(opponentDiscardPile).getByText('1'),
-        ).toBeInTheDocument()
+        expect(within(playerDiscardPile).getByText('2')).toBeInTheDocument()
 
-        // Both players refill their hands for the next round.
-        expect(
-            within(playerHand).getAllByRole('button', { name: /^play /i }),
-        ).toHaveLength(5)
-
-        expect(
-            within(opponentHand).getAllByRole('button', {
-                name: /^play /i,
-            }),
-        ).toHaveLength(5)
-
-        // The player who passed starts the next round.
+        // The passing player starts the next round.
         expect(
             screen.getByRole('heading', {
-                name: /opponent — your turn/i,
+                name: /you — your turn/i,
             }),
         ).toBeInTheDocument()
     })
@@ -181,16 +192,14 @@ describe('App', () => {
         render(<App />)
 
         const playerArea = screen.getByRole('region', { name: 'You' })
-        const playerHand = within(playerArea).getByRole('group', {
-            name: "You's hand",
-        })
 
-        // Change the game state before resetting it.
-        const firstPlayerCard = within(playerHand).getAllByRole('button', {
-            name: /^play /i,
-        })[0]
-
-        await user.click(firstPlayerCard)
+        await user.click(
+            within(
+                within(playerArea).getByRole('group', {
+                    name: "You's hand",
+                }),
+            ).getAllByRole('button', { name: /^play /i })[0],
+        )
 
         await user.click(
             screen.getByRole('button', { name: /new game/i }),
@@ -200,7 +209,7 @@ describe('App', () => {
             name: 'Opponent',
         })
 
-        const newPlayerHand = within(playerArea).getByRole('group', {
+        const playerHand = within(playerArea).getByRole('group', {
             name: "You's hand",
         })
         const opponentHand = within(opponentArea).getByRole('group', {
@@ -208,35 +217,28 @@ describe('App', () => {
         })
 
         expect(
-            within(newPlayerHand).getAllByRole('button', {
+            within(playerHand).getAllByRole('button', {
                 name: /^play /i,
             }),
         ).toHaveLength(5)
 
         expect(
-            within(opponentHand).getAllByRole('button', {
+            within(opponentHand).queryAllByRole('button', {
                 name: /^play /i,
             }),
-        ).toHaveLength(5)
-
-        const playerCourtCards = within(playerArea).getByRole('group', {
-            name: "You's court cards",
-        })
-        const opponentCourtCards = within(opponentArea).getByRole('group', {
-            name: "Opponent's court cards",
-        })
+        ).toHaveLength(0)
 
         expect(
-            within(playerCourtCards).getAllByRole('button', {
-                name: /^play /i,
-            }),
+            within(playerArea)
+                .getByRole('group', { name: "You's court cards" })
+                .querySelectorAll('button'),
         ).toHaveLength(4)
 
         expect(
-            within(opponentCourtCards).getAllByRole('button', {
-                name: /^play /i,
-            }),
-        ).toHaveLength(4)
+            within(opponentArea)
+                .getByRole('group', { name: "Opponent's court cards" })
+                .querySelectorAll('button'),
+        ).toHaveLength(0)
 
         expect(screen.getByText(/no bids yet/i)).toBeInTheDocument()
 
@@ -263,7 +265,6 @@ describe('App', () => {
         const user = userEvent.setup()
         render(<App />)
 
-        // Scores should not be displayed during normal play.
         expect(
             screen.queryByRole('heading', { name: 'Final scores' }),
         ).not.toBeInTheDocument()
@@ -272,41 +273,23 @@ describe('App', () => {
             screen.queryByRole('heading', { name: 'Game over' }),
         ).not.toBeInTheDocument()
 
-        // Each round must contain at least one legal bid before passing.
+        // The opponent always plays a legal card, so the human can
+        // consistently end each round by passing.
         for (let round = 0; round < 22; round += 1) {
-            const activeHeading = screen.getByRole('heading', {
-                name: /— Your turn$/,
+            const playerArea = screen.getByRole('region', { name: 'You' })
+            const playerHand = within(playerArea).getByRole('group', {
+                name: "You's hand",
             })
-
-            const activePlayerName = activeHeading.textContent?.replace(
-                ' — Your turn',
-                '',
-            )
-
-            if (!activePlayerName) {
-                throw new Error('Could not determine the active player.')
-            }
-
-            const activePlayerArea = screen.getByRole('region', {
-                name: activePlayerName,
-            })
-
-            const hand = within(activePlayerArea).getByRole('group', {
-                name: `${activePlayerName}'s hand`,
-            })
-
-            const handCards = within(hand).queryAllByRole('button', {
+            const handCards = within(playerHand).queryAllByRole('button', {
                 name: /^play /i,
             })
 
             if (handCards.length > 0) {
                 await user.click(handCards[0])
             } else {
-                const courtReserve = within(activePlayerArea).getByRole(
-                    'group',
-                    { name: `${activePlayerName}'s court cards` },
-                )
-
+                const courtReserve = within(playerArea).getByRole('group', {
+                    name: "You's court cards",
+                })
                 const courtCards = within(courtReserve).queryAllByRole(
                     'button',
                     { name: /^play /i },
@@ -315,6 +298,14 @@ describe('App', () => {
                 expect(courtCards.length).toBeGreaterThan(0)
                 await user.click(courtCards[0])
             }
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /you — your turn/i,
+                    }),
+                ).toBeInTheDocument()
+            })
 
             await user.click(
                 screen.getByRole('button', { name: /pass turn/i }),
@@ -349,34 +340,31 @@ describe('App', () => {
                 .parentElement?.querySelector('strong')?.textContent,
         )
 
-        // All Major Arcana values (0 through 21) total 231 points.
+        // Major Arcana values 0 through 21 total 231 points.
         expect(playerScore + opponentScore).toBe(231)
 
-        const opponentArea = screen.getByRole('region', {
-            name: 'Opponent',
-        })
         const playerArea = screen.getByRole('region', {
             name: 'You',
         })
 
-        const opponentMajorArcana = within(opponentArea).getByRole('group', {
-            name: "Opponent's Major Arcana",
+        const opponentArea = screen.getByRole('region', {
+            name: 'Opponent',
         })
 
         const playerMajorArcana = within(playerArea).getByRole('group', {
             name: "You's Major Arcana",
         })
+        const opponentMajorArcana = within(opponentArea).getByRole('group', {
+            name: "Opponent's Major Arcana",
+        })
 
-        const displayedMajorArcanaCount =
-            opponentMajorArcana.querySelectorAll(
-                '.owned-major-arcana__card',
-            ).length +
-            playerMajorArcana.querySelectorAll(
-                '.owned-major-arcana__card',
-            ).length
-
-        // Every Major Arcana must belong to exactly one player at game end.
-        expect(displayedMajorArcanaCount).toBe(22)
+        expect(
+            playerMajorArcana.querySelectorAll('.owned-major-arcana__card')
+                .length +
+                opponentMajorArcana.querySelectorAll(
+                    '.owned-major-arcana__card',
+                ).length,
+        ).toBe(22)
 
         expect(
             within(opponentArea).queryByRole('group', {
@@ -400,7 +388,6 @@ describe('App', () => {
             screen.queryByRole('button', { name: /pass turn/i }),
         ).not.toBeInTheDocument()
 
-        // Starting a new game should restore the normal game screen.
         await user.click(
             screen.getByRole('button', { name: /new game/i }),
         )

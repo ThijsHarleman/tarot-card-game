@@ -121,18 +121,25 @@ export function drawForPlayer(
     return updatePlayer(state, drawToHand(player))
 }
 
+/** Returns the active player's cards that can legally be played. */
+export function getLegalCards(state: GameState): TarotCard[] {
+    const player = getPlayer(state, state.activePlayerId)
+    const previousCard = state.playedCards.at(-1)
+
+    return [...player.hand, ...player.courtCards].filter(
+        (card) => canPlayCard(card, previousCard),
+    )
+}
+
 /** Plays a card if it belongs to the active player and follows the ranking rules. */
 export function playCard(
     state: GameState,
     cardId: string,
 ): GameState {
     const player = getPlayer(state, state.activePlayerId)
-    const handCard = player.hand.find((item) => item.id === cardId)
-    const courtCard = player.courtCards.find((item) => item.id === cardId)
-    const card = handCard ?? courtCard
-    const previousCard = state.playedCards.at(-1)
+    const card = getLegalCards(state).find((item) => item.id === cardId)
 
-    if (card === undefined || !canPlayCard(card, previousCard)) return state
+    if (card === undefined) return state
 
     const updatedPlayer: Player = {
         ...player,
