@@ -20,7 +20,7 @@ describe('App', () => {
         ).toBeInTheDocument()
 
         expect(
-            screen.getByRole('region', { name: 'Cards played this round' }),
+            screen.getByRole('group', { name: 'Cards played this round' }),
         ).toBeInTheDocument()
 
         expect(
@@ -74,11 +74,11 @@ describe('App', () => {
         // The first card is legal because the play area is empty.
         await user.click(cards[0])
 
-        const playArea = screen.getByRole('region', {
+        const playArea = screen.getByRole('group', {
             name: 'Cards played this round',
         })
 
-        expect(within(playArea).getAllByRole('article')).toHaveLength(1)
+        expect(playArea.querySelectorAll('.played-card')).toHaveLength(1)
 
         expect(
             screen.getByRole('heading', {
@@ -126,11 +126,11 @@ describe('App', () => {
             }),
         ).toBeInTheDocument()
 
-        const playArea = screen.getByRole('region', {
+        const playArea = screen.getByRole('group', {
             name: 'Cards played this round',
         })
 
-        expect(within(playArea).getAllByRole('article')).toHaveLength(1)
+        expect(playArea.querySelectorAll('.played-card')).toHaveLength(1)
 
         // The opponent passes, ending the round.
         await user.click(
@@ -138,9 +138,7 @@ describe('App', () => {
         )
 
         // Played cards are cleared from the play area.
-        expect(
-            within(playArea).queryAllByRole('article'),
-        ).toHaveLength(0)
+        expect(playArea.querySelectorAll('.played-card')).toHaveLength(0)
 
         // The played card goes into the passing opponent's discard pile.
         const opponentDiscardPile = within(opponentArea).getByRole('group', {
@@ -152,8 +150,6 @@ describe('App', () => {
         ).toBeInTheDocument()
 
         // Both players refill their hands for the next round.
-        // The opponent's played card was not in their hand, so their
-        // hand remains at five cards after the refill.
         expect(
             within(playerHand).getAllByRole('button', { name: /^play /i }),
         ).toHaveLength(5)
@@ -234,9 +230,7 @@ describe('App', () => {
             }),
         ).toHaveLength(4)
 
-        expect(
-            screen.getByText(/no cards played yet/i),
-        ).toBeInTheDocument()
+        expect(screen.getByText(/no bids yet/i)).toBeInTheDocument()
 
         expect(
             screen.getByRole('heading', {
