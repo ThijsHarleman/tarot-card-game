@@ -1,5 +1,6 @@
 
 import type { TarotCard, MajorArcanaCard } from '../../../game/cards/card'
+import { toRomanNumeral } from '../../../game/romanNumerals'
 
 interface AuctionAreaProps {
     currentPrize: MajorArcanaCard
@@ -24,7 +25,7 @@ export function AuctionArea({
                 <h2>Prize</h2>
                 <div className="major-arcana-card">
                     <span className="major-arcana-number">
-                        {currentPrize.number}
+                        {toRomanNumeral(currentPrize.number)}
                     </span>
                     <strong>{currentPrize.name}</strong>
                 </div>

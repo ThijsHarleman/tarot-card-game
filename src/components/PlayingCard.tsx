@@ -1,4 +1,5 @@
 import type { TarotCard } from '../game/cards/card'
+import { toRomanNumeral } from '../game/romanNumerals'
 
 interface PlayingCardProps {
     card: TarotCard
@@ -12,7 +13,7 @@ export function PlayingCard({ card }: PlayingCardProps) {
     if (card.kind === 'major') {
         return (
             <article className="playing-card" aria-label={card.name}>
-                <span className="playing-card__number">{card.number}</span>
+                <span className="playing-card__number">{toRomanNumeral(card.number)}</span>
                 <h2 className="playing-card__name">{card.name}</h2>
                 <span className="playing-card__category">Major Arcana</span>
             </article>
