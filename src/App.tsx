@@ -4,11 +4,12 @@ import './App.css'
 import type { Player } from './game/player'
 import type { TarotCard } from './game/cards/card'
 import { createGame, passTurn, playCard } from './game/game'
-import { calculateScore, getOwnedMajorArcana } from './game/score'
+import { getOwnedMajorArcana } from './game/score'
 import { randomStrategy } from './game/opponent/randomStrategy'
 import { executeOpponentDecision } from './game/opponent/executeDecision'
 import { CardBack } from './components/CardBack'
 import { PlayingCard } from './components/PlayingCard'
+import { GameResults } from './features/game/components/GameResults'
 
 const OPPONENT_ACTION_DELAY_MS = 700
 
@@ -140,38 +141,6 @@ function PlayerArea({
                     </div>
                 </div>
             )}
-        </section>
-    )
-}
-
-function GameResults({
-    player,
-    opponent,
-}: {
-    player: Player
-    opponent: Player
-}) {
-    const playerScore = calculateScore(player)
-    const opponentScore = calculateScore(opponent)
-
-    return (
-        <section className="play-area game-results" aria-label="Game results">
-            <div className="game-results__announcement">
-                <h2>Game over</h2>
-                <p>{playerScore > opponentScore ? 'You win!' : 'You lose.'}</p>
-            </div>
-
-            <div className="game-results__scores">
-                <h2>Final scores</h2>
-                <p>
-                    <span>You</span>
-                    <strong>{playerScore}</strong>
-                </p>
-                <p>
-                    <span>Opponent</span>
-                    <strong>{opponentScore}</strong>
-                </p>
-            </div>
         </section>
     )
 }
