@@ -3,6 +3,7 @@ import { useState } from 'react'
 import './App.css'
 import type { TarotCard } from './game/cards/card'
 import { createGame, passTurn, playCard } from './game/game'
+import { AuctionArea } from './features/game/components/AuctionArea'
 import { GameResults } from './features/game/components/GameResults'
 import { PlayerArea } from './features/game/components/PlayerArea'
 import { useOpponentTurn } from './features/game/hooks/useOpponentTurn'
@@ -44,62 +45,12 @@ function App() {
             {game.isGameOver ? (
                 <GameResults player={game.player} opponent={game.opponent} />
             ) : (
-                <section className="play-area" aria-label="Auction area">
-                    <div
-                        className="current-prize"
-                        role="group"
-                        aria-label="Current Major Arcana prize"
-                    >
-                        <h2>Prize</h2>
-                        <div className="major-arcana-card">
-                            <span className="major-arcana-number">
-                                {game.currentMajorArcana.number}
-                            </span>
-                            <strong>{game.currentMajorArcana.name}</strong>
-                        </div>
-                    </div>
-
-                    <div
-                        className="bidding-area"
-                        role="group"
-                        aria-label="Cards played this round"
-                    >
-                        <h2>Bids</h2>
-                        <div className="played-cards">
-                            {game.playedCards.map((card, index) => (
-                                <div
-                                    className={`played-card${
-                                        game.activePlayerId === 'player' &&
-                                        index === game.playedCards.length - 1
-                                            ? ' played-card--latest'
-                                            : ''
-                                    }`}
-                                    key={card.id}
-                                >
-                                    {card.kind === 'major' ? (
-                                        <strong>{card.name}</strong>
-                                    ) : (
-                                        <span>
-                                            {card.rank} of {card.suit}
-                                        </span>
-                                    )}
-                                </div>
-                            ))}
-
-                            {game.playedCards.length === 0 && (
-                                <p>No bids yet</p>
-                            )}
-                        </div>
-                    </div>
-
-                    <button
-                        className="pass-turn-button"
-                        onClick={handlePass}
-                        disabled={game.playedCards.length === 0}
-                    >
-                        Pass turn
-                    </button>
-                </section>
+                <AuctionArea
+                    currentPrize={game.currentMajorArcana}
+                    playedCards={game.playedCards}
+                    isHumanTurn={game.activePlayerId === 'player'}
+                    onPass={handlePass}
+                />
             )}
 
             <PlayerArea
