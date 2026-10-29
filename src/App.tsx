@@ -10,6 +10,8 @@ import { executeOpponentDecision } from './game/opponent/executeDecision'
 import { CardBack } from './components/CardBack'
 import { PlayingCard } from './components/PlayingCard'
 
+const OPPONENT_ACTION_DELAY_MS = 700
+
 function PlayerArea({
     player,
     isActive,
@@ -182,11 +184,17 @@ function App() {
             return
         }
 
-        const decision = randomStrategy.chooseAction(game)
+        const timeoutId = window.setTimeout(() => {
+            const decision = randomStrategy.chooseAction(game)
 
-        setGame((currentGame) =>
-            executeOpponentDecision(currentGame, decision),
-        )
+            setGame((currentGame) =>
+                executeOpponentDecision(currentGame, decision),
+            )
+        }, OPPONENT_ACTION_DELAY_MS)
+
+        return () => {
+            window.clearTimeout(timeoutId)
+        }
     }, [game])
 
     function handlePlay(card: TarotCard) {
@@ -243,8 +251,16 @@ function App() {
                     >
                         <h2>Bids</h2>
                         <div className="played-cards">
-                            {game.playedCards.map((card) => (
-                                <div className="played-card" key={card.id}>
+                            {game.playedCards.map((card, index) => (
+                                <div
+                                    className={`played-card${
+                                        game.activePlayerId === 'player' &&
+                                        index === game.playedCards.length - 1
+                                            ? ' played-card--latest'
+                                            : ''
+                                    }`}
+                                    key={card.id}
+                                >
                                     {card.kind === 'major' ? (
                                         <strong>{card.name}</strong>
                                     ) : (

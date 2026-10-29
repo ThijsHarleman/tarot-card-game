@@ -1,4 +1,3 @@
-
 import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -261,147 +260,162 @@ describe('App', () => {
         ).toHaveTextContent('No bids yet')
     })
 
-    it('shows final scores and owned Major Arcana only after the game ends', async () => {
-        const user = userEvent.setup()
-        render(<App />)
+    it(
+        'shows final scores and owned Major Arcana only after the game ends',
+        async () => {
+            const user = userEvent.setup()
 
-        expect(
-            screen.queryByRole('heading', { name: 'Final scores' }),
-        ).not.toBeInTheDocument()
+            render(<App />)
 
-        expect(
-            screen.queryByRole('heading', { name: 'Game over' }),
-        ).not.toBeInTheDocument()
+            expect(
+                screen.queryByRole('heading', { name: 'Final scores' }),
+            ).not.toBeInTheDocument()
 
-        // The opponent always plays a legal card, so the human can
-        // consistently end each round by passing.
-        for (let round = 0; round < 22; round += 1) {
-            const playerArea = screen.getByRole('region', { name: 'You' })
-            const playerHand = within(playerArea).getByRole('group', {
-                name: "You's hand",
-            })
-            const handCards = within(playerHand).queryAllByRole('button', {
-                name: /^play /i,
-            })
+            expect(
+                screen.queryByRole('heading', { name: 'Game over' }),
+            ).not.toBeInTheDocument()
 
-            if (handCards.length > 0) {
-                await user.click(handCards[0])
-            } else {
-                const courtReserve = within(playerArea).getByRole('group', {
-                    name: "You's court cards",
+            // The opponent always plays a legal card, so the human can
+            // consistently end each round by passing.
+            for (let round = 0; round < 22; round += 1) {
+                const playerArea = screen.getByRole('region', {
+                    name: 'You',
                 })
-                const courtCards = within(courtReserve).queryAllByRole(
+                const playerHand = within(playerArea).getByRole('group', {
+                    name: "You's hand",
+                })
+                const handCards = within(playerHand).queryAllByRole(
                     'button',
                     { name: /^play /i },
                 )
 
-                expect(courtCards.length).toBeGreaterThan(0)
-                await user.click(courtCards[0])
+                if (handCards.length > 0) {
+                    await user.click(handCards[0])
+                } else {
+                    const courtReserve = within(playerArea).getByRole(
+                        'group',
+                        { name: "You's court cards" },
+                    )
+                    const courtCards = within(courtReserve).queryAllByRole(
+                        'button',
+                        { name: /^play /i },
+                    )
+
+                    expect(courtCards.length).toBeGreaterThan(0)
+                    await user.click(courtCards[0])
+                }
+
+                // Wait for the opponent's delayed action to finish.
+                await waitFor(
+                    () => {
+                        expect(
+                            screen.getByRole('heading', {
+                                name: /you — your turn/i,
+                            }),
+                        ).toBeInTheDocument()
+                    },
+                    { timeout: 2_000 },
+                )
+
+                await user.click(
+                    screen.getByRole('button', { name: /pass turn/i }),
+                )
             }
 
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /you — your turn/i,
-                    }),
-                ).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', { name: 'Game over' }),
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByRole('heading', { name: 'Final scores' }),
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByText(/^(You win!|You lose\.)$/),
+            ).toBeInTheDocument()
+
+            const results = screen.getByRole('region', {
+                name: 'Game results',
             })
 
-            await user.click(
-                screen.getByRole('button', { name: /pass turn/i }),
+            const playerScore = Number(
+                within(results)
+                    .getByText('You', { selector: 'span' })
+                    .parentElement?.querySelector('strong')?.textContent,
             )
-        }
 
-        expect(
-            screen.getByRole('heading', { name: 'Game over' }),
-        ).toBeInTheDocument()
+            const opponentScore = Number(
+                within(results)
+                    .getByText('Opponent', { selector: 'span' })
+                    .parentElement?.querySelector('strong')?.textContent,
+            )
 
-        expect(
-            screen.getByRole('heading', { name: 'Final scores' }),
-        ).toBeInTheDocument()
+            // Major Arcana values 0 through 21 total 231 points.
+            expect(playerScore + opponentScore).toBe(231)
 
-        expect(
-            screen.getByText(/^(You win!|You lose\.)$/),
-        ).toBeInTheDocument()
+            const playerArea = screen.getByRole('region', {
+                name: 'You',
+            })
 
-        const results = screen.getByRole('region', {
-            name: 'Game results',
-        })
+            const opponentArea = screen.getByRole('region', {
+                name: 'Opponent',
+            })
 
-        const playerScore = Number(
-            within(results)
-                .getByText('You', { selector: 'span' })
-                .parentElement?.querySelector('strong')?.textContent,
-        )
+            const playerMajorArcana = within(playerArea).getByRole('group', {
+                name: "You's Major Arcana",
+            })
+            const opponentMajorArcana = within(opponentArea).getByRole(
+                'group',
+                { name: "Opponent's Major Arcana" },
+            )
 
-        const opponentScore = Number(
-            within(results)
-                .getByText('Opponent', { selector: 'span' })
-                .parentElement?.querySelector('strong')?.textContent,
-        )
-
-        // Major Arcana values 0 through 21 total 231 points.
-        expect(playerScore + opponentScore).toBe(231)
-
-        const playerArea = screen.getByRole('region', {
-            name: 'You',
-        })
-
-        const opponentArea = screen.getByRole('region', {
-            name: 'Opponent',
-        })
-
-        const playerMajorArcana = within(playerArea).getByRole('group', {
-            name: "You's Major Arcana",
-        })
-        const opponentMajorArcana = within(opponentArea).getByRole('group', {
-            name: "Opponent's Major Arcana",
-        })
-
-        expect(
-            playerMajorArcana.querySelectorAll('.owned-major-arcana__card')
-                .length +
-                opponentMajorArcana.querySelectorAll(
+            expect(
+                playerMajorArcana.querySelectorAll(
                     '.owned-major-arcana__card',
-                ).length,
-        ).toBe(22)
+                ).length +
+                    opponentMajorArcana.querySelectorAll(
+                        '.owned-major-arcana__card',
+                    ).length,
+            ).toBe(22)
 
-        expect(
-            within(opponentArea).queryByRole('group', {
-                name: "Opponent's hand",
-            }),
-        ).not.toBeInTheDocument()
+            expect(
+                within(opponentArea).queryByRole('group', {
+                    name: "Opponent's hand",
+                }),
+            ).not.toBeInTheDocument()
 
-        expect(
-            within(opponentArea).queryByRole('group', {
-                name: "Opponent's draw deck",
-            }),
-        ).not.toBeInTheDocument()
+            expect(
+                within(opponentArea).queryByRole('group', {
+                    name: "Opponent's draw deck",
+                }),
+            ).not.toBeInTheDocument()
 
-        expect(
-            within(opponentArea).queryByRole('group', {
-                name: "Opponent's discard pile",
-            }),
-        ).not.toBeInTheDocument()
+            expect(
+                within(opponentArea).queryByRole('group', {
+                    name: "Opponent's discard pile",
+                }),
+            ).not.toBeInTheDocument()
 
-        expect(
-            screen.queryByRole('button', { name: /pass turn/i }),
-        ).not.toBeInTheDocument()
+            expect(
+                screen.queryByRole('button', { name: /pass turn/i }),
+            ).not.toBeInTheDocument()
 
-        await user.click(
-            screen.getByRole('button', { name: /new game/i }),
-        )
+            await user.click(
+                screen.getByRole('button', { name: /new game/i }),
+            )
 
-        expect(
-            screen.queryByRole('heading', { name: 'Game over' }),
-        ).not.toBeInTheDocument()
+            expect(
+                screen.queryByRole('heading', { name: 'Game over' }),
+            ).not.toBeInTheDocument()
 
-        expect(
-            screen.getByRole('button', { name: /pass turn/i }),
-        ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: /pass turn/i }),
+            ).toBeInTheDocument()
 
-        expect(
-            screen.queryByRole('heading', { name: 'Final scores' }),
-        ).not.toBeInTheDocument()
-    })
+            expect(
+                screen.queryByRole('heading', { name: 'Final scores' }),
+            ).not.toBeInTheDocument()
+        },
+        30_000,
+    )
 })

@@ -308,6 +308,28 @@ button:focus-visible {
     overflow-wrap: anywhere;
 }
 
+.played-card--latest {
+    animation: opponent-card-play 240ms ease-out;
+}
+
+@keyframes opponent-card-play {
+    from {
+        opacity: 0.5;
+        transform: translateY(-8px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .played-card--latest {
+        animation: none;
+    }
+}
+
 .empty-message,
 .hand > p,
 .played-cards > p {
