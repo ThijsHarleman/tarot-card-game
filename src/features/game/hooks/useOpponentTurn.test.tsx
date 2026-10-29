@@ -2,14 +2,14 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createGame } from '../../../game/game'
-import { randomStrategy } from '../../../game/opponent/randomStrategy'
+import { conservativeStrategy } from '../../../game/opponent/conservativeStrategy'
 import { executeOpponentDecision } from '../../../game/opponent/executeDecision'
 import { useOpponentTurn } from './useOpponentTurn'
 import type { GameState } from '../../../game/game'
 
-vi.mock('../../../game/opponent/randomStrategy', () => ({
-    randomStrategy: {
-        name: 'Random',
+vi.mock('../../../game/opponent/conservativeStrategy', () => ({
+    conservativeStrategy: {
+        name: 'Conservative',
         chooseAction: vi.fn(),
     },
 }))
@@ -36,7 +36,7 @@ describe('useOpponentTurn', () => {
         renderHook(() => useOpponentTurn({ game, setGame }))
 
         expect(vi.getTimerCount()).toBe(0)
-        expect(randomStrategy.chooseAction).not.toHaveBeenCalled()
+        expect(conservativeStrategy.chooseAction).not.toHaveBeenCalled()
     })
 
     it('does not schedule an action when the game is over', () => {
@@ -49,7 +49,7 @@ describe('useOpponentTurn', () => {
         renderHook(() => useOpponentTurn({ game, setGame }))
 
         expect(vi.getTimerCount()).toBe(0)
-        expect(randomStrategy.chooseAction).not.toHaveBeenCalled()
+        expect(conservativeStrategy.chooseAction).not.toHaveBeenCalled()
     })
 
     it('chooses and executes an opponent action after the delay', () => {
@@ -61,24 +61,24 @@ describe('useOpponentTurn', () => {
         const decision = { type: 'pass' } as const
         const nextGame = { ...game, activePlayerId: 'player' as const }
 
-        vi.mocked(randomStrategy.chooseAction).mockReturnValue(decision)
+        vi.mocked(conservativeStrategy.chooseAction).mockReturnValue(decision)
         vi.mocked(executeOpponentDecision).mockReturnValue(nextGame)
 
         renderHook(() => useOpponentTurn({ game, setGame }))
 
-        expect(randomStrategy.chooseAction).not.toHaveBeenCalled()
+        expect(conservativeStrategy.chooseAction).not.toHaveBeenCalled()
 
         act(() => {
             vi.advanceTimersByTime(699)
         })
 
-        expect(randomStrategy.chooseAction).not.toHaveBeenCalled()
+        expect(conservativeStrategy.chooseAction).not.toHaveBeenCalled()
 
         act(() => {
             vi.advanceTimersByTime(1)
         })
 
-        expect(randomStrategy.chooseAction).toHaveBeenCalledWith(game)
+        expect(conservativeStrategy.chooseAction).toHaveBeenCalledWith(game)
         expect(setGame).toHaveBeenCalledOnce()
 
         const stateUpdater = setGame.mock.calls[0]?.[0]
@@ -110,7 +110,7 @@ describe('useOpponentTurn', () => {
             vi.advanceTimersByTime(700)
         })
 
-        expect(randomStrategy.chooseAction).not.toHaveBeenCalled()
+        expect(conservativeStrategy.chooseAction).not.toHaveBeenCalled()
         expect(setGame).not.toHaveBeenCalled()
     })
 })
