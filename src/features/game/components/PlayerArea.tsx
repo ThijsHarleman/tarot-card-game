@@ -19,7 +19,9 @@ export function PlayerArea({
     isHuman,
     onPlay,
 }: PlayerAreaProps) {
-    const ownedMajorArcana = isGameOver ? getOwnedMajorArcana(player) : []
+    const ownedMajorArcana = isGameOver ? [...getOwnedMajorArcana(player)].sort(
+        (a, b) => a.number - b.number,
+    ) : []
 
     return (
         <section
