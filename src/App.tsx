@@ -1,35 +1,16 @@
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 import type { TarotCard } from './game/cards/card'
 import { createGame, passTurn, playCard } from './game/game'
-import { randomStrategy } from './game/opponent/randomStrategy'
-import { executeOpponentDecision } from './game/opponent/executeDecision'
 import { GameResults } from './features/game/components/GameResults'
 import { PlayerArea } from './features/game/components/PlayerArea'
-
-const OPPONENT_ACTION_DELAY_MS = 700
+import { useOpponentTurn } from './features/game/hooks/useOpponentTurn'
 
 function App() {
     const [game, setGame] = useState(createGame)
 
-    useEffect(() => {
-        if (game.isGameOver || game.activePlayerId !== 'opponent') {
-            return
-        }
-
-        const timeoutId = window.setTimeout(() => {
-            const decision = randomStrategy.chooseAction(game)
-
-            setGame((currentGame) =>
-                executeOpponentDecision(currentGame, decision),
-            )
-        }, OPPONENT_ACTION_DELAY_MS)
-
-        return () => {
-            window.clearTimeout(timeoutId)
-        }
-    }, [game])
+    useOpponentTurn({ game, setGame })
 
     function handlePlay(card: TarotCard) {
         setGame((currentGame) => playCard(currentGame, card.id))
