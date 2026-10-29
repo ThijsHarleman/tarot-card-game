@@ -81,6 +81,39 @@ describe('executeOpponentDecision', () => {
         )
     })
 
+    it('plays a fallback card when asked to pass before the first bid', () => {
+        const state = createGame()
+        const legalCards = getLegalCards(state)
+
+        expect(state.playedCards).toHaveLength(0)
+        expect(state.activePlayerId).toBe('player')
+
+        // Start an opponent turn without adding any cards to the bid.
+        const opponentTurn = {
+            ...state,
+            activePlayerId: 'opponent' as const,
+        }
+
+        const opponentLegalCards = getLegalCards(opponentTurn)
+        expect(opponentLegalCards.length).toBeGreaterThan(0)
+
+        const nextState = executeOpponentDecision(opponentTurn, {
+            type: 'pass',
+        })
+
+        // The fallback plays a card instead of attempting an illegal pass.
+        expect(nextState.playedCards).toHaveLength(1)
+        expect(nextState.activePlayerId).toBe('player')
+
+        const playedCard = nextState.playedCards[0]
+        expect(playedCard).toBeDefined()
+        expect(
+            opponentLegalCards.some((card) => card.id === playedCard?.id),
+        ).toBe(true)
+
+        expect(legalCards.length).toBeGreaterThan(0)
+    })
+
     it('ignores an attempt to play an illegal card', () => {
         const state = createOpponentTurn()
 
