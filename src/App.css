@@ -1,3 +1,4 @@
+
 /* Shared card dimensions. Keep these global so every component uses the same size. */
 :root {
     --playing-card-width: 125px;
@@ -12,7 +13,11 @@
     box-sizing: border-box;
     min-height: 100vh;
     display: grid;
-    grid-template-rows: auto minmax(180px, 1fr) minmax(180px, 1fr) minmax(180px, 1fr);
+    grid-template-rows:
+        auto
+        minmax(180px, 1fr)
+        minmax(180px, 1fr)
+        minmax(180px, 1fr);
     gap: 1rem;
     padding: 1rem clamp(12px, 3vw, 40px);
 }
@@ -41,7 +46,9 @@
     transition: background-color 160ms ease, transform 160ms ease;
 }
 
-.game-header button { padding: 0.65rem 1rem; }
+.game-header button {
+    padding: 0.65rem 1rem;
+}
 
 .pass-turn-button {
     align-self: center;
@@ -54,10 +61,14 @@
 }
 
 .game-header button:hover,
-.pass-turn-button:not(:disabled):hover { background: #5a4374; }
+.pass-turn-button:not(:disabled):hover {
+    background: #5a4374;
+}
 
 .game-header button:active,
-.pass-turn-button:not(:disabled):active { transform: translateY(2px); }
+.pass-turn-button:not(:disabled):active {
+    transform: translateY(2px);
+}
 
 .pass-turn-button:disabled {
     background: #302a38;
@@ -75,6 +86,7 @@ button:focus-visible {
 
 .player-area,
 .play-area {
+    box-sizing: border-box;
     min-width: 0;
     padding: 1rem;
     border: 1px solid #4d405e;
@@ -113,7 +125,13 @@ button:focus-visible {
     border: 2px solid #c8b4e8;
     border-radius: 8px;
     background:
-        repeating-linear-gradient(45deg, transparent, transparent 6px, rgb(200 180 232 / 12%) 6px, rgb(200 180 232 / 12%) 8px),
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 6px,
+            rgb(200 180 232 / 12%) 6px,
+            rgb(200 180 232 / 12%) 8px
+        ),
         #352945;
     box-shadow: 3px 3px 0 #211a2c, 6px 6px 0 #66517d;
     color: #e7ddf7;
@@ -126,7 +144,9 @@ button:focus-visible {
     box-shadow: 3px 3px 0 #211a2c, 6px 6px 0 #55485e;
 }
 
-.card-pile strong { font-size: 1.1rem; }
+.card-pile strong {
+    font-size: 1.1rem;
+}
 
 .empty-message,
 .hand > p,
@@ -137,54 +157,87 @@ button:focus-visible {
 
 @media (max-width: 900px) {
     .play-area {
-        grid-template-columns: auto minmax(0, 1fr);
         gap: 1rem;
     }
 
     .pass-turn-button {
-        grid-column: 2;
         justify-self: end;
     }
 }
 
 @media (max-width: 720px) {
+    :root {
+        --playing-card-width: clamp(50px, 14.4vw, 77px);
+        --playing-card-height: clamp(66px, 11dvh, 88px);
+    }
+
+    #root {
+        min-height: 100%;
+    }
+
     .game-table {
-        grid-template-rows: auto minmax(150px, auto) minmax(150px, auto) minmax(150px, auto);
+        grid-template-rows: auto repeat(3, minmax(0, 1fr));
         gap: 0.5rem;
         padding: 0.75rem 0.5rem;
     }
 
-    .game-header { flex-wrap: wrap; }
-    .game-header button { padding: 0.55rem 0.75rem; }
+    .game-header {
+        gap: 0.5rem;
+        min-width: 0;
+    }
 
-    .player-area,
-    .play-area { padding: 0.65rem; }
+    .game-header h1 {
+        font-size: 1.15rem;
+    }
 
-    .player-area__content { gap: 0.5rem; }
-
-    .card-pile {
-        flex-basis: 56px;
-        min-height: 84px;
-        padding: 0.25rem;
+    .game-header button {
+        padding: 0.4rem 0.6rem;
         font-size: 0.8rem;
     }
 
+    .player-area,
     .play-area {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 1rem;
+        min-height: 0;
+        overflow: hidden;
+        padding: 0.4rem;
+        border-radius: 10px;
     }
 
-    .pass-turn-button {
-        grid-column: 1;
-        justify-self: stretch;
-        width: 100%;
-        min-height: 56px;
+    .player-area h2,
+    .play-area h2 {
+        margin-bottom: 0.25rem;
+        font-size: 0.8rem;
     }
 
-    .game-results { grid-template-columns: minmax(0, 1fr); }
+    .card-pile {
+        gap: 0.15rem;
+        padding: 0.15rem;
+        border-width: 1px;
+        border-radius: 5px;
+        box-shadow: none;
+    }
+
+    .card-pile strong {
+        font-size: 0.7rem;
+    }
+
+    .card-pile {
+        overflow: hidden;
+        overflow-wrap: anywhere;
+        text-align: center;
+        font-size: 0.5rem;
+        line-height: 1.1;
+    }
+
+    .card-pile strong {
+        font-size: 0.65rem;
+        line-height: 1;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .game-header button,
-    .pass-turn-button { transition: none; }
+    .pass-turn-button {
+        transition: none;
+    }
 }

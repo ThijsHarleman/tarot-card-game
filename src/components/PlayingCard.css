@@ -1,3 +1,4 @@
+
 /* Styles for the face of every visible tarot card. */
 .playing-card {
     box-sizing: border-box;
@@ -35,4 +36,37 @@
 .playing-card__category {
     color: #c4bfd0;
     font-size: 0.7rem;
+}
+
+@media (max-width: 720px) {
+    .playing-card {
+        padding: 6px 3px;
+        border-radius: 5px;
+        box-shadow: none;
+    }
+
+    .playing-card .playing-card__number {
+        font-size: 0.55rem;
+        line-height: 1;
+    }
+
+    .playing-card .playing-card__name {
+        margin: 4px 0;
+        font-size: 0.65rem;
+        line-height: 1.1;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+
+    .playing-card .playing-card__category {
+        font-size: 0.45rem;
+        line-height: 1.1;
+    }
+
+    /* Court cards have less room for their labels. */
+    .court-reserve__card .playing-card .playing-card__name {
+        margin: 3px 0;
+        font-size: 0.55rem;
+        line-height: 1.05;
+    }
 }

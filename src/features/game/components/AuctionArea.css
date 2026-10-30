@@ -1,3 +1,4 @@
+
 /* Auction area: current prize and cards played into the bid. */
 .play-area {
     display: grid;
@@ -26,7 +27,9 @@
 }
 
 .current-prize,
-.bidding-area { min-width: 0; }
+.bidding-area {
+    min-width: 0;
+}
 
 .played-cards {
     display: flex;
@@ -44,11 +47,20 @@
     min-width: var(--playing-card-width);
 }
 
-.played-card--latest { animation: opponent-card-play 240ms ease-out; }
+.played-card--latest {
+    animation: opponent-card-play 240ms ease-out;
+}
 
 @keyframes opponent-card-play {
-    from { opacity: 0.5; transform: translateY(-8px) scale(0.96); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+        opacity: 0.5;
+        transform: translateY(-8px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .game-results {
@@ -57,10 +69,14 @@
 }
 
 .game-results__announcement,
-.game-results__scores { min-width: 0; }
+.game-results__scores {
+    min-width: 0;
+}
 
 .game-results__announcement h2,
-.game-results__scores h2 { margin-bottom: 1rem; }
+.game-results__scores h2 {
+    margin-bottom: 1rem;
+}
 
 .game-results__announcement p {
     margin: 0;
@@ -86,6 +102,77 @@
     font-variant-numeric: tabular-nums;
 }
 
+@media (max-width: 720px) {
+    /* Prize and bids side by side. */
+    .play-area:not(.game-results) {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: start;
+        gap: 0.5rem;
+    }
+
+    .current-prize .playing-card {
+        margin-bottom: 0.35rem;
+    }
+
+    .current-prize .pass-turn-button {
+        min-height: 0;
+        padding: 0.4rem 0.2rem;
+        font-size: 0.65rem;
+        border-radius: 5px;
+        box-shadow: none;
+    }
+
+    .bidding-area {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .played-cards {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.25rem;
+        min-width: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 2px 2px 6px;
+    }
+
+    .played-card {
+        flex: 0 0 var(--playing-card-width);
+        width: var(--playing-card-width);
+        min-width: var(--playing-card-width);
+    }
+
+    .game-results {
+        grid-template-columns: minmax(0, 1fr);
+        overflow-y: auto;
+    }
+
+    .game-results__announcement h2,
+    .game-results__scores h2 {
+        margin-bottom: 0.5rem;
+    }
+
+    .game-results__announcement p {
+        font-size: 1.25rem;
+    }
+
+    .game-results__scores p {
+        gap: 0.5rem;
+        padding: 0.4rem 0;
+    }
+
+    .game-results__scores p strong {
+        font-size: 1.1rem;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .played-card--latest { animation: none; }
+    .played-card--latest {
+        animation: none;
+    }
 }

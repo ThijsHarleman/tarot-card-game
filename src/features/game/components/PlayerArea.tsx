@@ -26,7 +26,7 @@ export function PlayerArea({
 
     return (
         <section
-            className={`player-area${isActive && !isGameOver ? ' player-area--active' : ''}${isGameOver ? ' player-area--results' : ''}`}
+            className={`player-area ${isHuman ? 'player-area--human' : 'player-area--opponent'}${isActive && !isGameOver ? ' player-area--active' : ''}${isGameOver ? ' player-area--results' : ''}`}
             aria-label={player.name}
         >
             {isGameOver ? (
@@ -53,7 +53,12 @@ export function PlayerArea({
             ) : (
                 <div className="player-area__content">
                     <div className="player-area__identity">
-                        <h2>{player.name}</h2>
+                        <h2>
+                            <span className="player-name--desktop">{player.name}</span>
+                            <span className="player-name--mobile">
+                                {isHuman ? player.name : 'Opp'}
+                            </span>
+                        </h2>
                         <div className="player-piles">
                             <div
                                 className="card-pile"

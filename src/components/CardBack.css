@@ -1,3 +1,4 @@
+
 /* Decorative back used for the opponent's hidden hand. */
 .card-back {
     box-sizing: border-box;
@@ -9,7 +10,13 @@
     border: 1px solid #c8b4e8;
     border-radius: 10px;
     background:
-        repeating-linear-gradient(45deg, transparent, transparent 7px, rgb(200 180 232 / 18%) 7px, rgb(200 180 232 / 18%) 9px),
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 7px,
+            rgb(200 180 232 / 18%) 7px,
+            rgb(200 180 232 / 18%) 9px
+        ),
         linear-gradient(145deg, #49365f, #211a2c);
     box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
 }
@@ -28,4 +35,20 @@
 .card-back__symbol {
     color: #e7ddf7;
     font-size: 2.5rem;
+}
+
+@media (max-width: 720px) {
+    .card-back {
+        padding: 3px;
+        border-radius: 5px;
+        box-shadow: none;
+    }
+
+    .card-back__inner {
+        border-radius: 3px;
+    }
+
+    .card-back__symbol {
+        font-size: 1rem;
+    }
 }

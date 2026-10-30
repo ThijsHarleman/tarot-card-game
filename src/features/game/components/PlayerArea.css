@@ -1,3 +1,4 @@
+
 /* Player zones: court reserve, hand, piles, and game-over collection. */
 .player-area__content {
     display: flex;
@@ -12,6 +13,10 @@
     align-items: start;
     gap: 1rem;
     flex: 1;
+    min-width: 0;
+}
+
+.player-area__identity {
     min-width: 0;
 }
 
@@ -45,6 +50,10 @@
 
 .player-card-section h2 {
     margin: 0;
+}
+
+.player-name--mobile {
+    display: none;
 }
 
 .court-reserve {
@@ -116,7 +125,9 @@
     transition: transform 160ms ease;
 }
 
-.hand__card + .hand__card { margin-left: -38px; }
+.hand__card + .hand__card {
+    margin-left: -38px;
+}
 
 .hand__card:hover,
 .hand__card:focus-visible {
@@ -182,29 +193,143 @@
 
 @media (max-width: 720px) {
     .player-area__content {
-        grid-template-columns: 64px minmax(0, 1fr);
-        gap: 0.5rem;
+        gap: 0.35rem;
     }
 
-    .player-card-columns {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 1rem;
+    .player-area__identity {
+        gap: 0.25rem;
     }
 
     .player-area__identity h2,
     .player-card-section h2 {
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
 
-    .court-reserve {
-        gap: 4px;
+    .player-name--desktop {
+        display: none;
     }
-    .court-reserve__card .playing-card__name { font-size: 0.7rem; }
-    .hand { justify-content: flex-start; }
-    .hand__card + .hand__card { margin-left: -46px; }
+
+    .player-name--mobile {
+        display: inline;
+    }
+
+    .player-piles {
+        gap: 0.35rem;
+    }
+
+    .player-piles .card-pile {
+        width: 42px;
+        height: 60px;
+        min-height: 48px;
+    }
+
+    .player-card-columns {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.35rem;
+        min-height: 0;
+    }
+
+    .player-card-section {
+        gap: 0.15rem;
+        min-height: 0;
+    }
+
+    .court-reserve,
+    .hand {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 0.25rem;
+        width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 3px 2px 6px;
+    }
+
+    .court-reserve__card,
+    .hand__card {
+        flex: 0 0 var(--playing-card-width);
+        width: var(--playing-card-width);
+    }
+
+    .hand__card + .hand__card {
+        margin-left: 0;
+    }
+
+    /* Opponent: compact identity and vertically stacked card rows. */
+    .player-area--opponent .player-area__content {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        align-items: start;
+        gap: 0.35rem;
+    }
+
+    .player-area--opponent .player-piles {
+        width: 42px;
+        min-width: 42px;
+    }
+
+    .player-area--opponent .player-card-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.35rem;
+        min-height: 0;
+    }
+
+    .player-area--opponent .player-card-section {
+        gap: 0.15rem;
+        min-height: 0;
+    }
+
+    .player-area--opponent .court-reserve,
+    .player-area--opponent .hand {
+        flex-wrap: nowrap;
+        gap: 3px;
+        padding: 2px 2px 4px;
+    }
+
+    /* Human: give court and hand equal shares of the card-column height. */
+    .player-area--human .player-area__content {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        align-items: start;
+        gap: 0.35rem;
+        height: calc(100% - 1rem);
+    }
+
+    .player-area--human .player-piles {
+        width: 42px;
+        min-width: 42px;
+    }
+
+    .player-area--human .player-card-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.5rem;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .player-area--human .player-card-section {
+        min-height: 0;
+        gap: 0.2rem;
+        overflow: hidden;
+    }
+
+    .player-area--human .court-reserve,
+    .player-area--human .hand {
+        flex: 1;
+        align-items: flex-start;
+        gap: 0.25rem;
+        min-height: 0;
+        padding: 3px 2px 6px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .hand__card,
-    .court-reserve__card { transition: none; }
+    .court-reserve__card {
+        transition: none;
+    }
 }
