@@ -77,7 +77,7 @@ describe('AuctionArea', () => {
 
         expect(screen.getByText('No bids yet')).toBeInTheDocument()
         expect(
-            screen.getByRole('button', { name: 'Pass turn' }),
+            screen.getByRole('button', { name: 'Pass' }),
         ).toBeDisabled()
     })
 
@@ -94,7 +94,7 @@ describe('AuctionArea', () => {
             />,
         )
 
-        await user.click(screen.getByRole('button', { name: 'Pass turn' }))
+        await user.click(screen.getByRole('button', { name: 'Pass' }))
 
         expect(onPass).toHaveBeenCalledOnce()
     })

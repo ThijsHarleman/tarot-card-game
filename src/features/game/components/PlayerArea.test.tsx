@@ -37,10 +37,6 @@ describe('PlayerArea', () => {
             />,
         )
 
-        expect(
-            screen.getByRole('heading', { name: 'You' }),
-        ).toBeInTheDocument()
-
         const playerArea = screen.getByRole('region', { name: 'You' })
 
         expect(

@@ -41,7 +41,7 @@ vi.mock('./features/game/components/AuctionArea', () => ({
             <h2>Bids</h2>
             <p>{playedCards.length} cards played</p>
             <button onClick={onPass} disabled={playedCards.length === 0}>
-                Pass turn
+                Pass
             </button>
         </section>
     ),
@@ -142,7 +142,7 @@ describe('App', () => {
 
         render(<App />)
 
-        await user.click(screen.getByRole('button', { name: 'Pass turn' }))
+        await user.click(screen.getByRole('button', { name: 'Pass' }))
 
         expect(passTurn).toHaveBeenCalledWith(gameWithBids)
         expect(screen.getByText('The Magician')).toBeInTheDocument()
