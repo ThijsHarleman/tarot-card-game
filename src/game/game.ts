@@ -1,6 +1,5 @@
-import type { TarotCard } from './cards/card'
-import { MAJOR_ARCANA } from './cards/card'
-import type { MajorArcanaCard } from './cards/card'
+import { MAJOR_ARCANA, SUITS } from './cards/card'
+import type { MajorArcanaCard, Suit, TarotCard } from './cards/card'
 import { createPlayerCourtCards } from './cards/createPlayerCourtCards'
 import { createPlayerDeck } from './cards/createPlayerDeck'
 import { getNextMajorArcana } from './cards/getNextMajorArcana'
@@ -18,22 +17,35 @@ export interface GameState {
     readonly isGameOver: boolean
 }
 
-export function createGame(): GameState {
+function getRandomOpponentSuit(playerSuit: Suit): Suit {
+    const availableSuits = SUITS.filter((suit) => suit !== playerSuit)
+    const randomIndex = Math.floor(Math.random() * availableSuits.length)
+    const opponentSuit = availableSuits[randomIndex]
+
+    if (opponentSuit === undefined) {
+        throw new Error('Could not select an opponent suit')
+    }
+
+    return opponentSuit
+}
+
+export function createGame(playerSuit: Suit): GameState {
+    const opponentSuit = getRandomOpponentSuit(playerSuit)
     const initialState: GameState = {
         player: {
             id: 'player',
             name: 'You',
-            deck: shuffleDeck(createPlayerDeck('wands')),
+            deck: shuffleDeck(createPlayerDeck(playerSuit)),
             hand: [],
-            courtCards: createPlayerCourtCards('wands'),
+            courtCards: createPlayerCourtCards(playerSuit),
             discardPile: [],
         },
         opponent: {
             id: 'opponent',
             name: 'Opponent',
-            deck: shuffleDeck(createPlayerDeck('swords')),
+            deck: shuffleDeck(createPlayerDeck(opponentSuit)),
             hand: [],
-            courtCards: createPlayerCourtCards('swords'),
+            courtCards: createPlayerCourtCards(opponentSuit),
             discardPile: [],
         },
         activePlayerId: 'player',

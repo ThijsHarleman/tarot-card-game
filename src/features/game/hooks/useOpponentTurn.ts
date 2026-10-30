@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react'
 import { conservativeStrategy } from '../../../game/opponent/conservativeStrategy'
 import { executeOpponentDecision } from '../../../game/opponent/executeDecision'
@@ -6,8 +7,8 @@ import type { GameState } from '../../../game/game'
 const OPPONENT_ACTION_DELAY_MS = 700
 
 interface UseOpponentTurnOptions {
-    game: GameState
-    setGame: React.Dispatch<React.SetStateAction<GameState>>
+    game: GameState | null
+    setGame: React.Dispatch<React.SetStateAction<GameState | null>>
 }
 
 export function useOpponentTurn({
@@ -15,16 +16,28 @@ export function useOpponentTurn({
     setGame,
 }: UseOpponentTurnOptions): void {
     useEffect(() => {
-        if (game.isGameOver || game.activePlayerId !== 'opponent') {
+        if (
+            game === null ||
+            game.isGameOver ||
+            game.activePlayerId !== 'opponent'
+        ) {
             return
         }
 
         const timeoutId = window.setTimeout(() => {
             const decision = conservativeStrategy.chooseAction(game)
 
-            setGame((currentGame) =>
-                executeOpponentDecision(currentGame, decision),
-            )
+            setGame((currentGame) => {
+                if (
+                    currentGame === null ||
+                    currentGame.isGameOver ||
+                    currentGame.activePlayerId !== 'opponent'
+                ) {
+                    return currentGame
+                }
+
+                return executeOpponentDecision(currentGame, decision)
+            })
         }, OPPONENT_ACTION_DELAY_MS)
 
         return () => {

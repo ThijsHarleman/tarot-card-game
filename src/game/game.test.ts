@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createGame, drawToHand, passTurn, playCard } from './game'
 import type { Player } from './player'
+import { SUITS } from './cards/card'
 import type { TarotCard } from './cards/card'
 import { createPlayerDeck } from './cards/createPlayerDeck'
 import { HAND_LIMIT } from './rules'
@@ -42,7 +43,18 @@ function makePlayer(
 
 describe('createGame', () => {
     it('creates two players with separate suits and full opening hands', () => {
-        const game = createGame()
+        const game = createGame('wands')
+
+        const opponentCourtCard = game.opponent.courtCards[0]
+
+        expect(opponentCourtCard).toBeDefined()
+        expect(opponentCourtCard?.kind).toBe('minor')
+
+        if (opponentCourtCard?.kind !== 'minor') {
+            throw new Error('Expected an opponent minor arcana court card')
+        }
+
+        const opponentSuit = opponentCourtCard.suit
 
         expect(game.player.hand).toHaveLength(HAND_LIMIT)
         expect(game.opponent.hand).toHaveLength(HAND_LIMIT)
@@ -60,8 +72,14 @@ describe('createGame', () => {
         ).toBe(true)
 
         expect(
-            [...game.opponent.deck, ...game.opponent.hand].every(
-                (card) => card.kind === 'minor' && card.suit === 'swords',
+            game.opponent.deck.every(
+                (card) => card.kind === 'minor' && card.suit === opponentSuit,
+            ),
+        ).toBe(true)
+
+        expect(
+            game.opponent.hand.every(
+                (card) => card.kind === 'minor' && card.suit === opponentSuit,
             ),
         ).toBe(true)
 
@@ -73,7 +91,8 @@ describe('createGame', () => {
 
         expect(
             game.opponent.courtCards.every(
-                (card) => card.kind === 'minor' && card.suit === 'swords',
+                (card) => card.kind === 'minor' &&
+                    card.suit !== 'wands',
             ),
         ).toBe(true)
 
@@ -100,8 +119,56 @@ describe('createGame', () => {
         expect(game.playedCards).toEqual([])
     })
 
+    it.each(SUITS)(
+        'uses %s for the player and a different suit for the opponent',
+        (playerSuit) => {
+            const game = createGame(playerSuit)
+
+            const opponentSuit = game.opponent.courtCards[0]
+
+            expect(opponentSuit).toBeDefined()
+
+            if (opponentSuit?.kind !== 'minor') {
+                throw new Error('Expected an opponent court card')
+            }
+
+            expect(opponentSuit.suit).not.toBe(playerSuit)
+
+            const playerCards = [
+                ...game.player.deck,
+                ...game.player.hand,
+                ...game.player.courtCards,
+            ]
+
+            const opponentCards = [
+                ...game.opponent.deck,
+                ...game.opponent.hand,
+                ...game.opponent.courtCards,
+            ]
+
+            expect(
+                playerCards.every(
+                    (card) =>
+                        card.kind === 'minor' && card.suit === playerSuit,
+                ),
+            ).toBe(true)
+
+            expect(
+                opponentCards.every(
+                    (card) =>
+                        card.kind === 'minor' &&
+                        card.suit === opponentSuit.suit,
+                ),
+            ).toBe(true)
+
+            expect(
+                SUITS.filter((suit) => suit !== playerSuit),
+            ).toContain(opponentSuit.suit)
+        },
+    )
+
     it('starts the first auction with The Fool', () => {
-        const game = createGame()
+        const game = createGame('wands')
 
         expect(game.currentMajorArcana).toEqual({
             kind: 'major',
@@ -172,7 +239,7 @@ describe('drawToHand', () => {
 
 describe('playCard', () => {
     it('plays a legal card and switches turns', () => {
-        const game = createGame()
+        const game = createGame('wands')
 
         const state = {
             ...game,
@@ -187,7 +254,7 @@ describe('playCard', () => {
     })
 
     it('does not play a card that is not in the active hand or reserve', () => {
-        const game = createGame()
+        const game = createGame('wands')
 
         const state = {
             ...game,
@@ -198,7 +265,7 @@ describe('playCard', () => {
     })
 
     it('rejects a card that does not outrank the previous card', () => {
-        const game = createGame()
+        const game = createGame('wands')
 
         const state = {
             ...game,
@@ -210,7 +277,7 @@ describe('playCard', () => {
     })
 
     it('allows an ace on any previously played card', () => {
-        const game = createGame()
+        const game = createGame('wands')
 
         const state = {
             ...game,
@@ -225,7 +292,7 @@ describe('playCard', () => {
     })
 
     it('plays a court card directly from the reserve', () => {
-        const game = createGame()
+        const game = createGame('wands')
         const courtCard = game.player.courtCards[0]
 
         expect(courtCard).toBeDefined()
@@ -242,7 +309,7 @@ describe('playCard', () => {
 
 describe('passTurn', () => {
     it('moves played cards to the passing player, refills hands, and keeps them active', () => {
-        const game = createGame()
+        const game = createGame('wands')
 
         const state = {
             ...game,
@@ -274,7 +341,7 @@ describe('passTurn', () => {
     })
 
     it('recycles the passing player’s discard pile when refilling the next round', () => {
-        const game = createGame()
+        const game = createGame('wands')
 
         const state = {
             ...game,
@@ -297,7 +364,7 @@ describe('passTurn', () => {
     })
 
     it('awards the current Major Arcana to the player who did not pass', () => {
-        const game = createGame()
+        const game = createGame('wands')
         const result = passTurn({
             ...game,
             activePlayerId: 'player',
@@ -312,7 +379,7 @@ describe('passTurn', () => {
     })
 
     it('awards the prize to the player and keeps the passer active', () => {
-        const game = createGame()
+        const game = createGame('wands')
         const result = passTurn({
             ...game,
             activePlayerId: 'opponent',
@@ -326,7 +393,7 @@ describe('passTurn', () => {
     })
 
     it('does not allow a player to pass before any cards are bid', () => {
-        const state = createGame()
+        const state = createGame('wands')
 
         const nextState = passTurn(state)
 

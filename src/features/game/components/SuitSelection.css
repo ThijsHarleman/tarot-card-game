@@ -1,0 +1,102 @@
+
+.suit-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 36rem;
+    margin: 2rem auto;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.suit-selection h2 {
+    margin: 0;
+}
+
+.suit-selection__options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    margin: 0.5rem 0;
+}
+
+.suit-option {
+    min-width: 7rem;
+    padding: 0.75rem 1.25rem;
+    border: 2px solid #7865a8;
+    border-radius: 0.5rem;
+    background: #35254f;
+    color: #f4efff;
+    font: inherit;
+    text-transform: capitalize;
+    cursor: pointer;
+    transition:
+        background-color 150ms ease,
+        color 150ms ease,
+        border-color 150ms ease;
+}
+
+.suit-option:hover {
+    background: #483463;
+}
+
+.suit-option--selected {
+    background: #59447b;
+    color: #ffffff;
+    border-color: #b9a5e8;
+    font-weight: 700;
+}
+
+.suit-selection__start-button {
+    padding: 0.8rem 1.75rem;
+    border: 2px solid #7865a8;
+    border-radius: 0.5rem;
+    background: #483463;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background-color 150ms ease,
+        border-color 150ms ease;
+}
+
+.suit-selection__start-button:hover {
+    background: #59447b;
+    border-color: #b9a5e8;
+}
+
+.suit-option:focus-visible,
+.suit-selection__start-button:focus-visible {
+    outline: 3px solid #b9a5e8;
+    outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+    .suit-selection {
+        margin: 1rem auto;
+        padding: 1.5rem 1rem;
+    }
+
+    .suit-selection__options {
+        gap: 0.5rem;
+    }
+
+    .suit-option {
+        flex: 1 1 40%;
+        min-width: 0;
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .suit-option,
+    .suit-selection__start-button {
+        transition: none;
+    }
+}

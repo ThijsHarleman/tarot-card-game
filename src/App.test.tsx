@@ -57,7 +57,9 @@ vi.mock('./features/game/components/GameResults', () => ({
     }) => (
         <section aria-label="Game results">
             <h2>Game over</h2>
-            <p>{player.name} vs {opponent.name}</p>
+            <p>
+                {player.name} vs {opponent.name}
+            </p>
         </section>
     ),
 }))
@@ -81,7 +83,22 @@ describe('App', () => {
         vi.clearAllMocks()
     })
 
-    it('renders the game screen and its main sections', () => {
+    async function startGame(
+        user: ReturnType<typeof userEvent.setup>,
+        suit = 'wands',
+    ) {
+        await user.click(
+            screen.getByRole('button', {
+                name: suit.charAt(0).toUpperCase() + suit.slice(1),
+            }),
+        )
+
+        await user.click(
+            screen.getByRole('button', { name: 'Start game' }),
+        )
+    }
+
+    it('shows the suit-selection screen before a game starts', () => {
         render(<App />)
 
         expect(
@@ -89,31 +106,86 @@ describe('App', () => {
         ).toBeInTheDocument()
 
         expect(
-            screen.getByRole('button', { name: 'New game' }),
+            screen.getByRole('heading', { name: 'Choose your suit' }),
         ).toBeInTheDocument()
 
-        expect(screen.getByRole('region', { name: 'Opponent' })).toBeInTheDocument()
-        expect(screen.getByRole('region', { name: 'You' })).toBeInTheDocument()
-        expect(screen.getByRole('region', { name: 'Auction area' })).toBeInTheDocument()
-        expect(screen.getByText('The Fool')).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Wands' }),
+        ).toHaveAttribute('aria-pressed', 'true')
+
+        expect(
+            screen.getByRole('button', { name: 'Start game' }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.queryByRole('region', { name: 'Auction area' }),
+        ).not.toBeInTheDocument()
+
+        expect(createGame).not.toHaveBeenCalled()
     })
 
-    it('starts a new game when New game is clicked', async () => {
+    it('starts a game using the selected suit', async () => {
         const user = userEvent.setup()
 
         render(<App />)
 
+        await startGame(user, 'cups')
+
+        expect(createGame).toHaveBeenCalledTimes(1)
+        expect(createGame).toHaveBeenCalledWith('cups')
+
+        expect(
+            screen.getByRole('region', { name: 'Opponent' }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByRole('region', { name: 'You' }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByRole('region', { name: 'Auction area' }),
+        ).toBeInTheDocument()
+
+        expect(screen.getByText('The Fool')).toBeInTheDocument()
+
+        expect(
+            screen.getByRole('button', { name: 'New game' }),
+        ).toBeInTheDocument()
+    })
+
+    it('returns to suit selection when New game is clicked', async () => {
+        const user = userEvent.setup()
+
+        render(<App />)
+
+        await startGame(user)
+
         expect(createGame).toHaveBeenCalledTimes(1)
 
-        await user.click(screen.getByRole('button', { name: 'New game' }))
+        await user.click(
+            screen.getByRole('button', { name: 'New game' }),
+        )
 
-        expect(createGame).toHaveBeenCalledTimes(2)
+        expect(
+            screen.getByRole('heading', { name: 'Choose your suit' }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByRole('button', { name: 'Start game' }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.queryByRole('region', { name: 'Auction area' }),
+        ).not.toBeInTheDocument()
+
+        expect(createGame).toHaveBeenCalledTimes(1)
     })
 
     it('passes the current game state to the pass-turn rule', async () => {
         const user = userEvent.setup()
 
-        const initialGame = createGame()
+        const initialGame = createGame('wands')
+
         const gameWithBids: GameState = {
             ...initialGame,
             playedCards: [
@@ -142,6 +214,8 @@ describe('App', () => {
 
         render(<App />)
 
+        await startGame(user)
+
         await user.click(screen.getByRole('button', { name: 'Pass' }))
 
         expect(passTurn).toHaveBeenCalledWith(gameWithBids)
@@ -149,8 +223,9 @@ describe('App', () => {
         expect(screen.getByText('0 cards played')).toBeInTheDocument()
     })
 
-    it('shows the game results when the game is over', () => {
-        const initialGame = createGame()
+    it('shows the game results when the game is over', async () => {
+        const user = userEvent.setup()
+        const initialGame = createGame('wands')
 
         const finishedGame: GameState = {
             ...initialGame,
@@ -161,7 +236,14 @@ describe('App', () => {
 
         render(<App />)
 
-        expect(screen.getByRole('region', { name: 'Game results' })).toBeInTheDocument()
-        expect(screen.queryByRole('region', { name: 'Auction area' })).not.toBeInTheDocument()
+        await startGame(user)
+
+        expect(
+            screen.getByRole('region', { name: 'Game results' }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.queryByRole('region', { name: 'Auction area' }),
+        ).not.toBeInTheDocument()
     })
 })
