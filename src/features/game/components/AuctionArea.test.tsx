@@ -60,7 +60,7 @@ describe('AuctionArea', () => {
             name: 'Cards played this round',
         })
 
-        expect(bids).toHaveTextContent('five of wands')
+        expect(bids).toHaveTextContent('Five')
         expect(bids).toHaveTextContent('The Hierophant')
         expect(screen.queryByText('No bids yet')).not.toBeInTheDocument()
     })

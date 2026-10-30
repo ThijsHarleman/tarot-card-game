@@ -1,0 +1,72 @@
+/* Auction area: current prize and cards played into the bid. */
+.play-area {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.current-prize,
+.bidding-area { min-width: 0; }
+
+.played-cards {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.played-card {
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 var(--playing-card-width);
+    width: var(--playing-card-width);
+    min-width: var(--playing-card-width);
+}
+
+.played-card--latest { animation: opponent-card-play 240ms ease-out; }
+
+@keyframes opponent-card-play {
+    from { opacity: 0.5; transform: translateY(-8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.game-results {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+}
+
+.game-results__announcement,
+.game-results__scores { min-width: 0; }
+
+.game-results__announcement h2,
+.game-results__scores h2 { margin-bottom: 1rem; }
+
+.game-results__announcement p {
+    margin: 0;
+    color: #e7ddf7;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.game-results__scores p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #4d405e;
+}
+
+.game-results__scores p strong {
+    font-size: 1.5rem;
+    color: #e7ddf7;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .played-card--latest { animation: none; }
+}

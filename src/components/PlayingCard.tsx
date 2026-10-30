@@ -1,3 +1,4 @@
+import './PlayingCard.css'
 import type { TarotCard } from '../game/cards/card'
 import { toRomanNumeral } from '../game/romanNumerals'
 

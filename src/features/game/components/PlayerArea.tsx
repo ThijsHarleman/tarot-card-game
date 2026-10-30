@@ -1,5 +1,5 @@
+import './PlayerArea.css'
 import type { Player } from '../../../game/player'
-import { toRomanNumeral } from '../../../game/romanNumerals'
 import type { TarotCard } from '../../../game/cards/card'
 import { getOwnedMajorArcana } from '../../../game/score'
 import { CardBack } from '../../../components/CardBack'
@@ -42,10 +42,7 @@ export function PlayerArea({
                 >
                     {ownedMajorArcana.map((card) => (
                         <div className="owned-major-arcana__card" key={card.id}>
-                            <span className="major-arcana-number">
-                                {toRomanNumeral(card.number)}
-                            </span>
-                            <strong>{card.name}</strong>
+                            <PlayingCard card={card} />
                         </div>
                     ))}
 

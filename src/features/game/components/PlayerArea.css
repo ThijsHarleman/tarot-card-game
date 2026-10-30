@@ -1,0 +1,142 @@
+/* Player zones: court reserve, hand, piles, and game-over collection. */
+.court-reserve {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    flex: 0 0 auto;
+    max-width: 30%;
+    overflow-x: auto;
+    padding: 6px 4px 16px;
+}
+
+.court-reserve__card {
+    box-sizing: border-box;
+    flex: 0 0 var(--playing-card-width);
+    width: var(--playing-card-width);
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: transform 160ms ease;
+}
+
+.court-reserve__card .playing-card {
+    height: var(--playing-card-height);
+    min-height: var(--playing-card-height);
+    padding: 12px 8px;
+}
+
+.court-reserve__card .playing-card__name {
+    margin: 8px 0;
+    font-size: 0.8rem;
+}
+
+.court-reserve__card:hover,
+.court-reserve__card:focus-visible {
+    z-index: 2;
+    transform: translateY(-8px);
+}
+
+.hand {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+    gap: 0;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px 8px 16px;
+}
+
+.hand__card {
+    position: relative;
+    box-sizing: border-box;
+    flex: 0 0 var(--playing-card-width);
+    width: var(--playing-card-width);
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    color: inherit;
+    background: transparent;
+    text-align: inherit;
+    cursor: pointer;
+    transition: transform 160ms ease;
+}
+
+.hand__card + .hand__card { margin-left: -38px; }
+
+.hand__card:hover,
+.hand__card:focus-visible {
+    z-index: 2;
+    transform: translateY(-12px);
+}
+
+.player-area--results {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.owned-major-arcana {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 0.25rem 0.25rem 0.75rem;
+}
+
+.owned-major-arcana__card {
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 var(--playing-card-width);
+    width: var(--playing-card-width);
+    min-width: var(--playing-card-width);
+}
+
+.hidden-hand-count {
+    align-self: center;
+    margin: 0;
+    opacity: 0.75;
+    font-style: italic;
+}
+
+.hand__card--hidden {
+    cursor: default;
+    pointer-events: none;
+    transition: none;
+}
+
+.hand__card--hidden:hover,
+.hand__card--hidden:focus-visible {
+    z-index: auto;
+    transform: none;
+}
+
+/* Opponent court cards are visible but not interactive. */
+.court-reserve--opponent .court-reserve__card {
+    cursor: default;
+    pointer-events: none;
+    transition: none;
+}
+
+.court-reserve--opponent .court-reserve__card:hover,
+.court-reserve--opponent .court-reserve__card:focus-visible {
+    z-index: auto;
+    transform: none;
+}
+
+@media (max-width: 720px) {
+    .court-reserve { max-width: 25%; gap: 4px; }
+    .court-reserve__card .playing-card__name { font-size: 0.7rem; }
+    .hand { justify-content: flex-start; }
+    .hand__card + .hand__card { margin-left: -46px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hand__card,
+    .court-reserve__card { transition: none; }
+}

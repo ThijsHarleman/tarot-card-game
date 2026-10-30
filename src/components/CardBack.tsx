@@ -1,3 +1,4 @@
+import './CardBack.css'
 
 interface CardBackProps {
     index: number

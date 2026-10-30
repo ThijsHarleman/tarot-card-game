@@ -1,6 +1,6 @@
-
+import './AuctionArea.css'
 import type { TarotCard, MajorArcanaCard } from '../../../game/cards/card'
-import { toRomanNumeral } from '../../../game/romanNumerals'
+import { PlayingCard } from '../../../components/PlayingCard'
 
 interface AuctionAreaProps {
     currentPrize: MajorArcanaCard
@@ -23,12 +23,7 @@ export function AuctionArea({
                 aria-label="Current Major Arcana prize"
             >
                 <h2>Prize</h2>
-                <div className="major-arcana-card">
-                    <span className="major-arcana-number">
-                        {toRomanNumeral(currentPrize.number)}
-                    </span>
-                    <strong>{currentPrize.name}</strong>
-                </div>
+                <PlayingCard card={currentPrize} />
             </div>
 
             <div
@@ -47,13 +42,7 @@ export function AuctionArea({
                             }`}
                             key={card.id}
                         >
-                            {card.kind === 'major' ? (
-                                <strong>{card.name}</strong>
-                            ) : (
-                                <span>
-                                    {card.rank} of {card.suit}
-                                </span>
-                            )}
+                            <PlayingCard card={card} />
                         </div>
                     ))}
 
