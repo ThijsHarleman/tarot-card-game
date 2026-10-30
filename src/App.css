@@ -48,6 +48,26 @@
     padding: 0.65rem 1rem;
 }
 
+.game-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.how-to-play-button {
+    padding: 0.65rem 1rem;
+    color: inherit;
+    background: transparent;
+    border: 1px solid #a99055;
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.how-to-play-button:hover {
+    background: rgb(255 255 255 / 8%);
+}
+
 .pass-turn-button {
     align-self: center;
     justify-self: end;
@@ -194,6 +214,16 @@ button:focus-visible {
     .game-header button {
         padding: 0.4rem 0.6rem;
         font-size: 0.8rem;
+    }
+
+    .game-header__actions {
+        gap: 0.35rem;
+    }
+
+    .how-to-play-button,
+    .new-game-button {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.75rem;
     }
 
     .player-area,
