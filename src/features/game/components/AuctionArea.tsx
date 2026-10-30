@@ -24,6 +24,14 @@ export function AuctionArea({
             >
                 <h2>Prize</h2>
                 <PlayingCard card={currentPrize} />
+
+                <button
+                    className="pass-turn-button"
+                    onClick={onPass}
+                    disabled={playedCards.length === 0}
+                >
+                    Pass
+                </button>
             </div>
 
             <div
@@ -49,14 +57,6 @@ export function AuctionArea({
                     {playedCards.length === 0 && <p>No bids yet</p>}
                 </div>
             </div>
-
-            <button
-                className="pass-turn-button"
-                onClick={onPass}
-                disabled={playedCards.length === 0}
-            >
-                Pass turn
-            </button>
         </section>
     )
 }

@@ -29,113 +29,121 @@ export function PlayerArea({
             className={`player-area${isActive && !isGameOver ? ' player-area--active' : ''}${isGameOver ? ' player-area--results' : ''}`}
             aria-label={player.name}
         >
-            <h2>
-                {player.name}
-                {isActive && !isGameOver ? ' — Your turn' : ''}
-            </h2>
-
             {isGameOver ? (
-                <div
-                    className="owned-major-arcana"
-                    role="group"
-                    aria-label={`${player.name}'s Major Arcana`}
-                >
-                    {ownedMajorArcana.map((card) => (
-                        <div className="owned-major-arcana__card" key={card.id}>
-                            <PlayingCard card={card} />
-                        </div>
-                    ))}
-
-                    {ownedMajorArcana.length === 0 && (
-                        <p className="empty-message">
-                            No Major Arcana owned
-                        </p>
-                    )}
-                </div>
-            ) : (
-                <div className="player-area__content">
+                <>
+                    <h2>{player.name}</h2>
                     <div
-                        className="card-pile"
+                        className="owned-major-arcana"
                         role="group"
-                        aria-label={`${player.name}'s draw deck`}
+                        aria-label={`${player.name}'s Major Arcana`}
                     >
-                        <span>Deck</span>
-                        <strong>{player.deck.length}</strong>
-                    </div>
+                        {ownedMajorArcana.map((card) => (
+                            <div className="owned-major-arcana__card" key={card.id}>
+                                <PlayingCard card={card} />
+                            </div>
+                        ))}
 
-                    <div
-                        className={`court-reserve${isHuman ? '' : ' court-reserve--opponent'}`}
-                        role="group"
-                        aria-label={`${player.name}'s court cards`}
-                    >
-                        {player.courtCards.map((card) =>
-                            isHuman ? (
-                                <button
-                                    className="court-reserve__card"
-                                    key={card.id}
-                                    onClick={() => onPlay(card)}
-                                    aria-label={`Play ${card.id}`}
-                                >
-                                    <PlayingCard card={card} />
-                                </button>
-                            ) : (
-                                <div
-                                    className="court-reserve__card"
-                                    key={card.id}
-                                >
-                                    <PlayingCard card={card} />
-                                </div>
-                            ),
-                        )}
-
-                        {player.courtCards.length === 0 && (
+                        {ownedMajorArcana.length === 0 && (
                             <p className="empty-message">
-                                No court cards remaining
+                                No Major Arcana owned
                             </p>
                         )}
                     </div>
+                </>
+            ) : (
+                <div className="player-area__content">
+                    <div className="player-area__identity">
+                        <h2>{player.name}</h2>
+                        <div className="player-piles">
+                            <div
+                                className="card-pile"
+                                role="group"
+                                aria-label={`${player.name}'s draw deck`}
+                            >
+                                <span>Deck</span>
+                                <strong>{player.deck.length}</strong>
+                            </div>
 
-                    <div
-                        className="hand"
-                        role="group"
-                        aria-label={`${player.name}'s hand`}
-                    >
-                        {isHuman ? (
-                            <>
-                                {player.hand.map((card, index) => (
-                                    <button
-                                        className="hand__card"
-                                        key={`${card.id}-${index}`}
-                                        onClick={() => onPlay(card)}
-                                        aria-label={`Play ${card.id}`}
-                                    >
-                                        <PlayingCard card={card} />
-                                    </button>
-                                ))}
-
-                                {player.hand.length === 0 && (
-                                    <p>No cards in hand</p>
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                {player.hand.map((card, index) => (
-                                    <CardBack
-                                        key={`${card.id}-${index}`}
-                                        index={index}
-                                    />
-                                ))}
-                            </>
-                        )}
+                            <div
+                                className="card-pile card-pile--discard"
+                                role="group"
+                                aria-label={`${player.name}'s discard pile`}
+                            >
+                                <span>Discard</span>
+                                <strong>{player.discardPile.length}</strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <div
-                        className="card-pile card-pile--discard"
-                        role="group"
-                        aria-label={`${player.name}'s discard pile`}
-                    >
-                        <span>Discard</span>
-                        <strong>{player.discardPile.length}</strong>
+                    <div className="player-card-columns">
+                        <section className="player-card-section">
+                            <h2>Court</h2>
+                            <div
+                                className={`court-reserve${isHuman ? '' : ' court-reserve--opponent'}`}
+                                role="group"
+                                aria-label={`${player.name}'s court cards`}
+                            >
+                                {player.courtCards.map((card) =>
+                                    isHuman ? (
+                                        <button
+                                            className="court-reserve__card"
+                                            key={card.id}
+                                            onClick={() => onPlay(card)}
+                                            aria-label={`Play ${card.id}`}
+                                        >
+                                            <PlayingCard card={card} />
+                                        </button>
+                                    ) : (
+                                        <div className="court-reserve__card" key={card.id}>
+                                            <PlayingCard card={card} />
+                                        </div>
+                                    ),
+                                )}
+
+                                {player.courtCards.length === 0 && (
+                                    <p className="empty-message">
+                                        No court cards remaining
+                                    </p>
+                                )}
+                            </div>
+                        </section>
+
+                        <section className="player-card-section">
+                            <h2>Hand</h2>
+                            <div
+                                className="hand"
+                                role="group"
+                                aria-label={`${player.name}'s hand`}
+                            >
+                                {isHuman ? (
+                                    <>
+                                        {player.hand.map((card, index) => (
+                                            <button
+                                                className="hand__card"
+                                                key={`${card.id}-${index}`}
+                                                onClick={() => onPlay(card)}
+                                                aria-label={`Play ${card.id}`}
+                                            >
+                                                <PlayingCard card={card} />
+                                            </button>
+                                        ))}
+
+                                        {player.hand.length === 0 && (
+                                            <p>No cards in hand</p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        {player.hand.map((card, index) => (
+                                            <CardBack
+                                                key={`${card.id}-${index}`}
+                                                index={index}
+                                            />
+                                        ))}
+                                    </>
+                                )}
+                            </div>
+                        </section>
                     </div>
                 </div>
             )}

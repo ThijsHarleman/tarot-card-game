@@ -1,9 +1,28 @@
 /* Auction area: current prize and cards played into the bid. */
 .play-area {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
     gap: 1.5rem;
+    min-width: 0;
+}
+
+.current-prize {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 0;
+}
+
+.current-prize .playing-card {
+    margin-bottom: 1rem;
+}
+
+.current-prize .pass-turn-button {
+    align-self: stretch;
+    min-width: 0;
+    width: 100%;
 }
 
 .current-prize,
