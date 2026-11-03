@@ -35,7 +35,7 @@ function makeState(
     hand: TarotCard[],
     playedCards: TarotCard[] = [],
 ): GameState {
-    const game = createGame()
+    const game = createGame("wands")
 
     return {
         ...game,

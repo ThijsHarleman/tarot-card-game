@@ -25,7 +25,7 @@ describe('useOpponentTurn', () => {
     beforeEach(() => {
         vi.useFakeTimers()
         vi.clearAllMocks()
-        game = createGame()
+        game = createGame("wands")
     })
 
     afterEach(() => {

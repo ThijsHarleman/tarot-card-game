@@ -8,7 +8,7 @@ import {
 import { executeOpponentDecision } from './executeDecision'
 
 function createOpponentTurn() {
-    const initialState = createGame()
+    const initialState = createGame("wands")
     const firstCard = getLegalCards(initialState)[0]
 
     if (firstCard === undefined) {
@@ -82,7 +82,7 @@ describe('executeOpponentDecision', () => {
     })
 
     it('plays a fallback card when asked to pass before the first bid', () => {
-        const state = createGame()
+        const state = createGame("wands")
         const legalCards = getLegalCards(state)
 
         expect(state.playedCards).toHaveLength(0)
@@ -126,7 +126,7 @@ describe('executeOpponentDecision', () => {
     })
 
     it('ignores decisions when it is not the opponent’s turn', () => {
-        const state = createGame()
+        const state = createGame("wands")
 
         const nextState = executeOpponentDecision(state, {
             type: 'pass',

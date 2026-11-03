@@ -4,7 +4,7 @@ import { createGame, getLegalCards, playCard } from '../game'
 import { randomStrategy } from './randomStrategy'
 
 function createOpponentTurn() {
-    const initialState = createGame()
+    const initialState = createGame("wands")
     const firstCard = getLegalCards(initialState)[0]
 
     if (firstCard === undefined) {
