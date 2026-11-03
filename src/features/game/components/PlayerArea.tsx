@@ -11,6 +11,7 @@ interface PlayerAreaProps {
     isGameOver: boolean
     isHuman: boolean
     onPlay: (card: TarotCard) => void
+    legalCardIds?: ReadonlySet<string>
 }
 
 export function PlayerArea({
@@ -19,6 +20,7 @@ export function PlayerArea({
     isGameOver,
     isHuman,
     onPlay,
+    legalCardIds,
 }: PlayerAreaProps) {
     const ownedMajorArcana = isGameOver ? [...getOwnedMajorArcana(player)].sort(
         (a, b) => a.number - b.number,
@@ -95,6 +97,7 @@ export function PlayerArea({
                                             key={card.id}
                                             onClick={() => onPlay(card)}
                                             aria-label={`Play ${card.id}`}
+                                            disabled={!legalCardIds?.has(card.id)}
                                         >
                                             <PlayingCard card={card} />
                                         </button>
@@ -128,6 +131,7 @@ export function PlayerArea({
                                                 key={`${card.id}-${index}`}
                                                 onClick={() => onPlay(card)}
                                                 aria-label={`Play ${card.id}`}
+                                                disabled={!legalCardIds?.has(card.id)}
                                             >
                                                 <PlayingCard card={card} />
                                             </button>

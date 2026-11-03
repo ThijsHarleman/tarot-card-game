@@ -23,6 +23,12 @@ function createTestPlayer(
     }
 }
 
+function getCardIds(
+    cards: readonly { id: string }[],
+): ReadonlySet<string> {
+    return new Set(cards.map((card) => card.id))
+}
+
 describe('PlayerArea', () => {
     it('shows the player name, deck count, hand, and court cards', () => {
         const player = createTestPlayer('player', 'You', 'wands')
@@ -34,6 +40,10 @@ describe('PlayerArea', () => {
                 isGameOver={false}
                 isHuman
                 onPlay={vi.fn()}
+                legalCardIds={getCardIds([
+                    ...player.hand,
+                    ...player.courtCards,
+                ])}
             />,
         )
 
@@ -46,7 +56,9 @@ describe('PlayerArea', () => {
         ).toHaveTextContent('2')
 
         expect(
-            within(playerArea).getAllByRole('button', { name: /^play /i }),
+            within(playerArea).getAllByRole('button', {
+                name: /^play /i,
+            }),
         ).toHaveLength(player.hand.length + player.courtCards.length)
     })
 
@@ -62,6 +74,10 @@ describe('PlayerArea', () => {
                 isGameOver={false}
                 isHuman
                 onPlay={onPlay}
+                legalCardIds={getCardIds([
+                    ...player.hand,
+                    ...player.courtCards,
+                ])}
             />,
         )
 
@@ -77,6 +93,96 @@ describe('PlayerArea', () => {
         )
 
         expect(onPlay).toHaveBeenCalledWith(firstCard)
+    })
+
+    it('disables human cards that are not legal to play', () => {
+        const player = createTestPlayer('player', 'You', 'wands')
+        const legalCard = player.hand[0]!
+        const illegalCard = player.hand[1]!
+
+        render(
+            <PlayerArea
+                player={player}
+                isActive
+                isGameOver={false}
+                isHuman
+                onPlay={vi.fn()}
+                legalCardIds={new Set([legalCard.id])}
+            />,
+        )
+
+        const playerArea = screen.getByRole('region', { name: 'You' })
+
+        expect(
+            within(playerArea).getByRole('button', {
+                name: `Play ${legalCard.id}`,
+            }),
+        ).toBeEnabled()
+
+        expect(
+            within(playerArea).getByRole('button', {
+                name: `Play ${illegalCard.id}`,
+            }),
+        ).toBeDisabled()
+    })
+
+    it('does not call onPlay when an illegal human card is clicked', async () => {
+        const user = userEvent.setup()
+        const player = createTestPlayer('player', 'You', 'wands')
+        const onPlay = vi.fn()
+        const illegalCard = player.hand[0]!
+
+        render(
+            <PlayerArea
+                player={player}
+                isActive
+                isGameOver={false}
+                isHuman
+                onPlay={onPlay}
+                legalCardIds={new Set()}
+            />,
+        )
+
+        const playerArea = screen.getByRole('region', { name: 'You' })
+
+        await user.click(
+            within(playerArea).getByRole('button', {
+                name: `Play ${illegalCard.id}`,
+            }),
+        )
+
+        expect(onPlay).not.toHaveBeenCalled()
+    })
+
+    it('disables court cards that are not legal to play', () => {
+        const player = createTestPlayer('player', 'You', 'wands')
+        const legalCourtCard = player.courtCards[0]!
+        const illegalCourtCard = player.courtCards[1]!
+
+        render(
+            <PlayerArea
+                player={player}
+                isActive
+                isGameOver={false}
+                isHuman
+                onPlay={vi.fn()}
+                legalCardIds={new Set([legalCourtCard.id])}
+            />,
+        )
+
+        const playerArea = screen.getByRole('region', { name: 'You' })
+
+        expect(
+            within(playerArea).getByRole('button', {
+                name: `Play ${legalCourtCard.id}`,
+            }),
+        ).toBeEnabled()
+
+        expect(
+            within(playerArea).getByRole('button', {
+                name: `Play ${illegalCourtCard.id}`,
+            }),
+        ).toBeDisabled()
     })
 
     it('does not make the opponent hand playable', () => {

@@ -92,8 +92,8 @@
     font-size: 0.8rem;
 }
 
-.court-reserve__card:hover,
-.court-reserve__card:focus-visible {
+.court-reserve__card:not(:disabled):hover,
+.court-reserve__card:not(:disabled):focus-visible {
     z-index: 2;
     transform: translateY(-8px);
 }
@@ -128,8 +128,8 @@
     margin-left: -38px;
 }
 
-.hand__card:hover,
-.hand__card:focus-visible {
+.hand__card:not(:disabled):hover,
+.hand__card:not(:disabled):focus-visible {
     z-index: 2;
     transform: translateY(-12px);
 }
@@ -175,6 +175,12 @@
 .hand__card--hidden:focus-visible {
     z-index: auto;
     transform: none;
+}
+
+/* Illegal cards in the human player's hand and court reserve. */
+.player-area--human .hand__card:disabled,
+.player-area--human .court-reserve__card:disabled {
+    cursor: default;
 }
 
 /* Opponent court cards are visible but not interactive. */

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import type { Suit, TarotCard } from './game/cards/card'
-import { createGame, passTurn, playCard } from './game/game'
+import { createGame, getLegalCards, passTurn, playCard } from './game/game'
 import type { GameState } from './game/game'
 import { AuctionArea } from './features/game/components/AuctionArea'
 import { GameResults } from './features/game/components/GameResults'
@@ -112,6 +112,7 @@ function App() {
                         isGameOver={game.isGameOver}
                         isHuman={true}
                         onPlay={handlePlay}
+                        legalCardIds={new Set(getLegalCards(game).map((card) => card.id))}
                     />
                 </>
             )}
