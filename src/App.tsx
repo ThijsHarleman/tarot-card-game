@@ -37,7 +37,7 @@ function App() {
     }
 
     function handleReset() {
-        setGame(null)
+        setGame(createGame(selectedSuit))
     }
 
     useEffect(() => {

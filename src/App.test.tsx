@@ -153,33 +153,31 @@ describe('App', () => {
         ).toBeInTheDocument()
     })
 
-    it('returns to suit selection when New game is clicked', async () => {
+
+    it('starts a fresh game with the previously selected suit when New game is clicked', async () => {
         const user = userEvent.setup()
 
         render(<App />)
 
-        await startGame(user)
+        await user.click(screen.getByRole('button', { name: 'Cups' }))
+        await user.click(screen.getByRole('button', { name: 'Start game' }))
 
-        expect(createGame).toHaveBeenCalledTimes(1)
+        expect(createGame).toHaveBeenLastCalledWith('cups')
 
-        await user.click(
-            screen.getByRole('button', { name: 'New game' }),
-        )
+        await user.click(screen.getByRole('button', { name: 'New game' }))
+
+        expect(createGame).toHaveBeenCalledTimes(2)
+        expect(createGame).toHaveBeenLastCalledWith('cups')
 
         expect(
-            screen.getByRole('heading', { name: 'Choose your suit' }),
+            screen.getByRole('region', { name: 'Auction area' }),
         ).toBeInTheDocument()
 
         expect(
-            screen.getByRole('button', { name: 'Start game' }),
-        ).toBeInTheDocument()
-
-        expect(
-            screen.queryByRole('region', { name: 'Auction area' }),
+            screen.queryByRole('heading', { name: 'Choose your suit' }),
         ).not.toBeInTheDocument()
-
-        expect(createGame).toHaveBeenCalledTimes(1)
     })
+
 
     it('passes the current game state to the pass-turn rule', async () => {
         const user = userEvent.setup()
