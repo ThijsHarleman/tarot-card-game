@@ -1,12 +1,7 @@
-
 /* Shared card dimensions. Keep these global so every component uses the same size. */
 :root {
     --playing-card-width: 125px;
     --playing-card-height: 190px;
-}
-
-#root {
-    min-height: 100vh;
 }
 
 .game-table {
@@ -174,16 +169,6 @@ button:focus-visible {
     font-size: 0.9rem;
 }
 
-@media (max-width: 900px) {
-    .play-area {
-        gap: 1rem;
-    }
-
-    .pass-turn-button {
-        justify-self: end;
-    }
-}
-
 @media (max-width: 720px) {
     :root {
         --playing-card-width: clamp(50px, 14.4vw, 77px);
@@ -246,13 +231,6 @@ button:focus-visible {
         border-width: 1px;
         border-radius: 5px;
         box-shadow: none;
-    }
-
-    .card-pile strong {
-        font-size: 0.7rem;
-    }
-
-    .card-pile {
         overflow: hidden;
         overflow-wrap: anywhere;
         text-align: center;
