@@ -42,7 +42,7 @@ function getCardStrength(card: TarotCard): number {
  * Estimates how undesirable the current bid is to receive.
  * A high score means the bid contains mostly strong cards.
  */
-function evaluateBidQuality(state: GameState): number {
+export function evaluateBidQuality(state: GameState): number {
     if (state.playedCards.length === 0) {
         return 0.5
     }
@@ -63,7 +63,7 @@ function evaluateBidQuality(state: GameState): number {
 /**
  * Estimates the strategic value of the current Major Arcana prize.
  */
-function evaluatePrizeValue(state: GameState): number {
+export function evaluatePrizeValue(state: GameState): number {
     const maxNumber = 21
 
     return state.currentMajorArcana.number / maxNumber
