@@ -12,7 +12,7 @@ export interface RoundEvaluationExample {
     readonly maxWinDesirability: number
 }
 
-function minor(suit: Suit, rank: Rank): TarotCard {
+export function minor(suit: Suit, rank: Rank): TarotCard {
     return {
         kind: 'minor',
         id: `minor-${suit}-${rank}`,
@@ -21,7 +21,7 @@ function minor(suit: Suit, rank: Rank): TarotCard {
     }
 }
 
-function major(number: number): MajorArcanaCard {
+export function major(number: number): MajorArcanaCard {
     const name = MAJOR_ARCANA[number]
 
     if (name === undefined) {
@@ -36,7 +36,7 @@ function major(number: number): MajorArcanaCard {
     }
 }
 
-function createExampleState(
+export function createExampleState(
     options: {
         readonly prizeNumber?: number
         readonly playedCards?: TarotCard[]
