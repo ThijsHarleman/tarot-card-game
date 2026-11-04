@@ -108,32 +108,90 @@ describe('filterCardActions', () => {
         expect(result).toEqual([])
     })
 
-    it('excludes a Major Arcana whose number is greater than half the prize number', () => {
-        const tooStrong = major(6)
+    it('allows a Major Arcana when playing it is better than passing', () => {
+        const candidate = major(11)
+
         const state = createExampleState({
-            prizeNumber: 10,
-            playedCards: [minor('wands', 'five')],
+            prizeNumber: 20,
+            playedCards: [],
             opponentHand: [],
             opponentCourtCards: [],
         })
 
-        const result = filter(state, [tooStrong])
+        const result = filter(state, [candidate])
+
+        expect(result.map(item => item.card.id)).toEqual([candidate.id])
+    })
+
+    it('allows a Major Arcana when playing it is better than passing despite previous Major Arcana bids', () => {
+        const candidate = major(11)
+
+        const state = createExampleState({
+            prizeNumber: 20,
+            playedCards: [
+                major(5),
+                minor('wands', 'two'),
+            ],
+            opponentHand: [],
+            opponentCourtCards: [],
+        })
+
+        const result = filter(state, [candidate])
+
+        expect(result.map(item => item.card.id)).toEqual([candidate.id])
+    })
+
+    it('excludes a Major Arcana when playing it is worse than passing', () => {
+        const candidate = major(8)
+
+        const state = createExampleState({
+            prizeNumber: 20,
+            playedCards: [
+                major(6),
+                major(7),
+                minor('wands', 'five'),
+            ],
+            opponentHand: [],
+            opponentCourtCards: [],
+        })
+
+        const result = filter(state, [candidate])
 
         expect(result).toEqual([])
     })
 
-    it('allows a Major Arcana whose number is exactly half the prize number', () => {
-        const acceptable = major(5)
+    it('allows a Major Arcana when playing and passing have equal score differentials', () => {
+        const candidate = major(10)
+
         const state = createExampleState({
-            prizeNumber: 10,
-            playedCards: [minor('wands', 'five')],
+            prizeNumber: 20,
+            playedCards: [major(5)],
             opponentHand: [],
             opponentCourtCards: [],
         })
 
-        const result = filter(state, [acceptable])
+        const result = filter(state, [candidate])
 
-        expect(result.map(item => item.card.id)).toEqual([acceptable.id])
+        expect(result.map(item => item.card.id)).toEqual([candidate.id])
+    })
+
+    it('allows a Major Arcana when the total bid remains below the prize', () => {
+        const candidate = major(8)
+
+        const state = createExampleState({
+            prizeNumber: 20,
+            playedCards: [
+                major(6),
+                major(5),
+                minor('wands', 'five'),
+            ],
+            opponentHand: [],
+            opponentCourtCards: [],
+        })
+
+        const result = filter(state, [candidate])
+
+        expect(result.map(item => item.card.id)).toEqual([candidate.id])
     })
 
     it('preserves the original evaluation scores for cards that remain', () => {

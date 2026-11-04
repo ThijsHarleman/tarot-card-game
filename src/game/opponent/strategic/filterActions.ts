@@ -1,4 +1,5 @@
 import type { GameState } from '../../game'
+import type { TarotCard } from '../../../game/cards/card'
 import type { CardActionEvaluation } from './evaluateCardActions'
 
 export function filterCardActions(
@@ -32,15 +33,34 @@ export function filterCardActions(
             }
         }
 
-        // Never play a Major Arcana worth more than half
-        // the current prize.
-        if (
-            card.kind === 'major' &&
-            card.number > state.currentMajorArcana.number / 2
-        ) {
+        if (!isMajorArcanaWorthPlaying(state, card)) {
             return false
         }
 
         return true
     })
+}
+
+function getCurrentBidMajorArcanaValue(
+    state: GameState,
+): number {
+    return state.playedCards.reduce(
+        (total, card) =>
+            card.kind === 'major'
+                ? total + card.number
+                : total,
+        0,
+    )
+}
+
+function isMajorArcanaWorthPlaying(
+    state: GameState,
+    card: TarotCard,
+): boolean {
+    if (card.kind !== 'major') return true
+
+    const prizeValue = state.currentMajorArcana.number
+    const currentBidValue = getCurrentBidMajorArcanaValue(state)
+
+    return currentBidValue + card.number <= prizeValue
 }
