@@ -1,3 +1,4 @@
+
 import { MAJOR_ARCANA } from '../../cards/card'
 import { createGame } from '../../game'
 import type { GameState } from '../../game'
@@ -36,12 +37,26 @@ export function major(number: number): MajorArcanaCard {
     }
 }
 
+/**
+ * Creates placeholder cards for the discard pile.
+ * Their identities do not matter for round evaluation;
+ * only the number of available cards matters.
+ */
+function createDiscardCards(count: number): TarotCard[] {
+    return Array.from(
+        { length: count },
+        () => minor('swords', 'two'),
+    )
+}
+
 export function createExampleState(
     options: {
         readonly prizeNumber?: number
         readonly playedCards?: TarotCard[]
+        readonly opponentDeck?: TarotCard[]
         readonly opponentHand?: TarotCard[]
         readonly opponentCourtCards?: TarotCard[]
+        readonly opponentDiscardPile?: TarotCard[]
     } = {},
 ): GameState {
     const base = createGame('wands')
@@ -53,12 +68,15 @@ export function createExampleState(
         currentMajorArcana: major(options.prizeNumber ?? 0),
         opponent: {
             ...base.opponent,
+            deck: options.opponentDeck ?? base.opponent.deck,
             hand: options.opponentHand ?? [
                 minor('swords', 'two'),
                 minor('swords', 'five'),
                 minor('swords', 'king'),
             ],
             courtCards: options.opponentCourtCards ?? [],
+            // Keep existing examples unaffected by deck sustainability.
+            discardPile: options.opponentDiscardPile ?? createDiscardCards(20),
         },
     }
 }
@@ -102,7 +120,7 @@ export const roundEvaluationExamples: readonly RoundEvaluationExample[] = [
             ],
             opponentHand: [
                 minor('swords', 'queen'),
-            ]
+            ],
         }),
         minWinDesirability: 0.0,
         maxWinDesirability: 0.5,
@@ -132,7 +150,7 @@ export const roundEvaluationExamples: readonly RoundEvaluationExample[] = [
                 minor('swords', 'three'),
                 minor('swords', 'four'),
                 minor('swords', 'five'),
-                minor('wands', 'queen')
+                minor('wands', 'queen'),
             ],
             opponentHand: [
                 minor('swords', 'two'),
@@ -238,9 +256,7 @@ export const roundEvaluationExamples: readonly RoundEvaluationExample[] = [
                 minor('swords', 'five'),
                 minor('swords', 'ten'),
             ],
-            opponentCourtCards: [
-                minor('swords', 'page'),
-            ],
+            opponentCourtCards: [],
         }),
         minWinDesirability: 0,
         maxWinDesirability: 0.4,
@@ -309,10 +325,95 @@ export const roundEvaluationExamples: readonly RoundEvaluationExample[] = [
                 minor('swords', 'four'),
             ],
             opponentHand: [
-                major(2)
+                major(2),
             ],
         }),
         minWinDesirability: 0.7,
         maxWinDesirability: 1,
+    },
+
+    // Deck sustainability examples
+
+    {
+        name: 'Healthy card supply',
+        description:
+            'I have 14 available cards. My supply is healthy, so deck ' +
+            'sustainability should not influence my preference to win.',
+        state: createExampleState({
+            prizeNumber: 0,
+            playedCards: [],
+            opponentDeck: [],
+            opponentHand: [
+                minor('swords', 'two'),
+                minor('swords', 'five'),
+                minor('swords', 'king'),
+            ],
+            opponentCourtCards: [],
+            opponentDiscardPile: createDiscardCards(11),
+        }),
+        minWinDesirability: 0.7,
+        maxWinDesirability: 0.9,
+    },
+    {
+        name: 'Card supply approaching minimum',
+        description:
+            'I have 12 available cards. My supply is getting low, so I ' +
+            'should be somewhat more willing to pass and collect the bid.',
+        state: createExampleState({
+            prizeNumber: 0,
+            playedCards: [],
+            opponentDeck: [],
+            opponentHand: [
+                minor('swords', 'two'),
+                minor('swords', 'five'),
+                minor('swords', 'king'),
+            ],
+            opponentCourtCards: [],
+            opponentDiscardPile: createDiscardCards(9),
+        }),
+        minWinDesirability: 0.4,
+        maxWinDesirability: 0.7,
+    },
+    {
+        name: 'Card supply at minimum',
+        description:
+            'I have only 10 available cards. I should strongly prefer ' +
+            'passing and replenishing my supply, unless other factors ' +
+            'make winning especially important.',
+        state: createExampleState({
+            prizeNumber: 0,
+            playedCards: [],
+            opponentDeck: [],
+            opponentHand: [
+                minor('swords', 'two'),
+                minor('swords', 'five'),
+                minor('swords', 'king'),
+            ],
+            opponentCourtCards: [],
+            opponentDiscardPile: createDiscardCards(7),
+        }),
+        minWinDesirability: 0.1,
+        maxWinDesirability: 0.4,
+    },
+    {
+        name: 'Depleted supply at the final prize',
+        description:
+            'My available card total is only 10, but the prize is The World. ' +
+            'At the end of the game, deck sustainability should no longer ' +
+            'influence my preference: winning the final prize takes priority.',
+        state: createExampleState({
+            prizeNumber: 21,
+            playedCards: [],
+            opponentDeck: [],
+            opponentHand: [
+                minor('swords', 'two'),
+                minor('swords', 'five'),
+                minor('swords', 'king'),
+            ],
+            opponentCourtCards: [],
+            opponentDiscardPile: createDiscardCards(7),
+        }),
+        minWinDesirability: 1.0,
+        maxWinDesirability: 1.0,
     },
 ]

@@ -1,3 +1,4 @@
+
 import { describe, expect, it } from 'vitest'
 import { evaluateRound } from './evaluateRound'
 import { roundEvaluationExamples } from './evaluateRoundExamples'
@@ -31,6 +32,9 @@ describe('round evaluation examples', () => {
                 prizeValue: Number(evaluation.prizeValue.toFixed(3)),
                 winningOpportunity: Number(
                     evaluation.winningOpportunity.toFixed(3),
+                ),
+                deckSustainability: Number(
+                    evaluation.deckSustainability.toFixed(3),
                 ),
             }
         })
