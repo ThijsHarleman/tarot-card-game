@@ -50,58 +50,62 @@ export const strategicStrategy: OpponentStrategy = {
     name: 'Strategic',
 
     chooseAction(state: GameState): OpponentDecision {
-        const { winDesirability } = evaluateRound(state)
+        try {
+            const { winDesirability } = evaluateRound(state)
 
-        const passEvaluation = evaluatePassAction(
-            state,
-            winDesirability,
-        )
+            const passEvaluation = evaluatePassAction(
+                state,
+                winDesirability,
+            )
 
-        const canPass = canPassStrategically(state)
+            const canPass = canPassStrategically(state)
 
-        const shouldPass = canPass && selectWeighted([
-            {
-                value: true,
-                weight: passEvaluation.passDesirability,
-            },
-            {
-                value: false,
-                weight: 1 - passEvaluation.passDesirability,
-            },
-        ])
+            const shouldPass = canPass && selectWeighted([
+                {
+                    value: true,
+                    weight: passEvaluation.passDesirability,
+                },
+                {
+                    value: false,
+                    weight: 1 - passEvaluation.passDesirability,
+                },
+            ])
 
-        if (shouldPass) {
+            if (shouldPass) {
+                return { type: 'pass' }
+            }
+
+            const cardEvaluations = evaluateCardActions(
+                state,
+                winDesirability,
+            )
+
+            if (cardEvaluations.length === 0) {
+                return { type: 'pass' }
+            }
+
+            const acceptableCards = filterCardActions(
+                state,
+                cardEvaluations,
+            )
+
+            if (acceptableCards.length === 0) {
+                return { type: 'pass' }
+            }
+
+            const selectedCard = selectWeighted(
+                acceptableCards.map(evaluation => ({
+                    value: evaluation.card,
+                    weight: evaluation.score,
+                })),
+            )
+
+            return {
+                type: 'play',
+                cardId: selectedCard.id,
+            }
+        } catch (error) {
             return { type: 'pass' }
-        }
-
-        const cardEvaluations = evaluateCardActions(
-            state,
-            winDesirability,
-        )
-
-        if (cardEvaluations.length === 0) {
-            return { type: 'pass' }
-        }
-
-        const acceptableCards = filterCardActions(
-            state,
-            cardEvaluations,
-        )
-
-        if (acceptableCards.length === 0) {
-            return { type: 'pass' }
-        }
-
-        const selectedCard = selectWeighted(
-            acceptableCards.map(evaluation => ({
-                value: evaluation.card,
-                weight: evaluation.score,
-            })),
-        )
-
-        return {
-            type: 'play',
-            cardId: selectedCard.id,
         }
     }
 }

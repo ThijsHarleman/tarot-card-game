@@ -17,8 +17,19 @@ export interface CardActionEvaluation {
 const ALIGNMENT_WEIGHT = 0.7
 const OPPORTUNITY_COST_WEIGHT = 0.3
 
-function getCardValue(card: TarotCard): number {
-    if (card.kind === 'major') return 1
+function getCardValue(
+    card: TarotCard,
+    state: GameState,
+): number {
+    if (card.kind === 'major') {
+        const maximumUsefulMajorNumber =
+            state.currentMajorArcana.number / 2
+
+        return Math.min(
+            card.number / Math.max(maximumUsefulMajorNumber, 1),
+            1,
+        )
+    }
 
     return RANKS.indexOf(card.rank) / (RANKS.length - 1)
 }
@@ -45,11 +56,12 @@ function evaluateOpportunityCost(
     }
 
     // Minor Arcana in the hand are comparatively expendable.
-    return getCardValue(card) * 0.5
+    return getCardValue(card, state) * 0.5
 }
 
 function evaluateStrategicAlignment(
     card: TarotCard,
+    state: GameState,
     winDesirability: number,
 ): number {
     // Preserve the Ace's flexibility regardless of the current goal.
@@ -57,7 +69,7 @@ function evaluateStrategicAlignment(
         return 0.1
     }
 
-    const cardValue = getCardValue(card)
+    const cardValue = getCardValue(card, state)
 
     if (winDesirability >= 0.5) {
         // When I want to win, prefer low cards.
@@ -95,6 +107,7 @@ export function evaluateCardActions(
         .map((card): CardActionEvaluation => {
             const strategicAlignment = evaluateStrategicAlignment(
                 card,
+                state,
                 winDesirability,
             )
 
