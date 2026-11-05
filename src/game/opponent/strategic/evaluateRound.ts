@@ -2,6 +2,10 @@ import { getLegalCards } from '../../game'
 import type { GameState } from '../../game'
 import { MAJOR_ARCANA, RANKS } from '../../cards/card'
 import type { TarotCard } from '../../cards/card'
+import {
+    DEFAULT_STRATEGY_CONFIG,
+    type StrategyConfig,
+} from './config'
 
 export interface RoundEvaluation {
     readonly winDesirability: number
@@ -10,21 +14,6 @@ export interface RoundEvaluation {
     readonly winningOpportunity: number
     readonly deckSustainability: number
 }
-
-const INITIAL_BID_QUALITY_WEIGHT = 0.4
-const INITIAL_PRIZE_VALUE_WEIGHT = 0.0
-const INITIAL_WINNING_OPPORTUNITY_WEIGHT = 0.6
-
-const CARD_STRENGTH_EXPONENT = 2
-
-// Card totals at or above this value are considered healthy.
-const HEALTHY_CARD_COUNT = 14
-
-// The AI should strongly prefer replenishing its cards at or below this value.
-const MINIMUM_CARD_COUNT = 10
-
-// Maximum reduction in win desirability caused by card depletion.
-const MAX_DECK_SUSTAINABILITY_INFLUENCE = 0.5
 
 function getCardStrength(card: TarotCard): number {
     if (card.kind === 'major') return 1
@@ -49,7 +38,10 @@ export function evaluatePrizeValue(state: GameState): number {
     return state.currentMajorArcana.number / (MAJOR_ARCANA.length - 1)
 }
 
-function evaluateWinningOpportunity(state: GameState): number {
+function evaluateWinningOpportunity(
+    state: GameState,
+    config: StrategyConfig,
+): number {
     const opponentState: GameState = {
         ...state,
         activePlayerId: 'opponent',
@@ -81,53 +73,72 @@ function evaluateWinningOpportunity(state: GameState): number {
     const opportunity =
         strongestAvailableValue / strongestPossibleValue
 
-    return Math.pow(Math.min(opportunity, 1), CARD_STRENGTH_EXPONENT)
+    return Math.pow(
+        Math.min(opportunity, 1),
+        config.roundEvaluation.cardStrengthExponent,
+    )
 }
 
-function evaluateDeckSustainability(state: GameState): number {
+function evaluateDeckSustainability(
+    state: GameState,
+    config: StrategyConfig,
+): number {
     const availableCardCount =
         state.opponent.deck.length +
         state.opponent.hand.length +
         state.opponent.courtCards.length +
         state.opponent.discardPile.length
 
-    if (availableCardCount >= HEALTHY_CARD_COUNT) return 0
-    if (availableCardCount <= MINIMUM_CARD_COUNT) return 1
+    const {
+        healthyCardCount,
+        minimumCardCount,
+    } = config.roundEvaluation
+
+    if (availableCardCount >= healthyCardCount) return 0
+    if (availableCardCount <= minimumCardCount) return 1
 
     return (
-        (HEALTHY_CARD_COUNT - availableCardCount) /
-        (HEALTHY_CARD_COUNT - MINIMUM_CARD_COUNT)
+        (healthyCardCount - availableCardCount) /
+        (healthyCardCount - minimumCardCount)
     )
 }
 
-export function evaluateRound(state: GameState): RoundEvaluation {
+export function evaluateRound(
+    state: GameState,
+    config: StrategyConfig = DEFAULT_STRATEGY_CONFIG,
+): RoundEvaluation {
+    const {
+        bidQualityWeight: initialBidQualityWeight,
+        prizeValueWeight: initialPrizeValueWeight,
+        winningOpportunityWeight: initialWinningOpportunityWeight,
+        maxDeckSustainabilityInfluence,
+    } = config.roundEvaluation
+
     const bidQuality = evaluateBidQuality(state)
     const prizeValue = evaluatePrizeValue(state)
-    const winningOpportunity = evaluateWinningOpportunity(state)
-    const deckSustainability = evaluateDeckSustainability(state)
+    const winningOpportunity = evaluateWinningOpportunity(state, config)
+    const deckSustainability = evaluateDeckSustainability(state, config)
 
     const progress =
         state.currentMajorArcana.number / (MAJOR_ARCANA.length - 1)
 
     const bidQualityWeight =
-        INITIAL_BID_QUALITY_WEIGHT * (1 - progress)
+        initialBidQualityWeight * (1 - progress)
 
     const winningOpportunityWeight =
-        INITIAL_WINNING_OPPORTUNITY_WEIGHT * (1 - progress)
+        initialWinningOpportunityWeight * (1 - progress)
 
     const prizeValueWeight =
-        INITIAL_PRIZE_VALUE_WEIGHT +
-        (1 - INITIAL_PRIZE_VALUE_WEIGHT) * progress
+        initialPrizeValueWeight +
+        (1 - initialPrizeValueWeight) * progress
 
     const baseWinDesirability =
         (1 - bidQuality) * bidQualityWeight +
         prizeValue * prizeValueWeight +
         winningOpportunity * winningOpportunityWeight
 
-    // Sustainability encourages passing early, but matters less as the
-    // game approaches its final prize.
     const sustainabilityInfluence =
-        MAX_DECK_SUSTAINABILITY_INFLUENCE *
+        maxDeckSustainabilityInfluence *
         deckSustainability *
         (1 - progress)
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { TarotCard } from '../../cards/card'
+import { DEFAULT_STRATEGY_CONFIG } from './config'
 import { createExampleState, minor } from './evaluateRoundExamples'
 import type { CardActionEvaluation } from './evaluateCardActions'
 
@@ -21,7 +22,7 @@ vi.mock('./evaluateCardActions', () => ({
     evaluateCardActions: mocks.evaluateCardActions,
 }))
 
-import { strategicStrategy } from './strategy'
+import { strategy } from './strategy'
 
 function evaluation(
     card: TarotCard,
@@ -36,7 +37,7 @@ function evaluation(
     }
 }
 
-describe('strategicStrategy', () => {
+describe('strategy', () => {
     beforeEach(() => {
         vi.clearAllMocks()
 
@@ -55,7 +56,7 @@ describe('strategicStrategy', () => {
         mocks.evaluateCardActions.mockReturnValue([])
     })
 
-    it('evaluates the round and passes its win desirability to both action evaluators', () => {
+    it('evaluates the round and passes its win desirability and configuration to both action evaluators', () => {
         const state = createExampleState({
             prizeNumber: 10,
             playedCards: [minor('wands', 'five')],
@@ -63,18 +64,32 @@ describe('strategicStrategy', () => {
             opponentCourtCards: [],
         })
 
-        const card = minor('swords', 'six')
         mocks.evaluateRound.mockReturnValue({ winDesirability: 0.75 })
         mocks.evaluatePassAction.mockReturnValue({
             passDesirability: 0,
         })
-        mocks.evaluateCardActions.mockReturnValue([evaluation(card)])
+        mocks.evaluateCardActions.mockReturnValue([
+            evaluation(minor('swords', 'six')),
+        ])
 
-        strategicStrategy.chooseAction(state)
+        strategy.chooseAction(state)
 
-        expect(mocks.evaluateRound).toHaveBeenCalledWith(state)
-        expect(mocks.evaluatePassAction).toHaveBeenCalledWith(state, 0.75)
-        expect(mocks.evaluateCardActions).toHaveBeenCalledWith(state, 0.75)
+        expect(mocks.evaluateRound).toHaveBeenCalledWith(
+            state,
+            DEFAULT_STRATEGY_CONFIG,
+        )
+
+        expect(mocks.evaluatePassAction).toHaveBeenCalledWith(
+            state,
+            0.75,
+            DEFAULT_STRATEGY_CONFIG,
+        )
+
+        expect(mocks.evaluateCardActions).toHaveBeenCalledWith(
+            state,
+            0.75,
+            DEFAULT_STRATEGY_CONFIG,
+        )
     })
 
     it('does not pass when a legal non-Ace Minor Arcana remains in hand', () => {
@@ -91,7 +106,7 @@ describe('strategicStrategy', () => {
         })
         mocks.evaluateCardActions.mockReturnValue([evaluation(card)])
 
-        const result = strategicStrategy.chooseAction(state)
+        const result = strategy.chooseAction(state)
 
         expect(result).toEqual({
             type: 'play',
@@ -113,7 +128,7 @@ describe('strategicStrategy', () => {
         })
         mocks.evaluateCardActions.mockReturnValue([evaluation(page)])
 
-        const result = strategicStrategy.chooseAction(state)
+        const result = strategy.chooseAction(state)
 
         expect(result).toEqual({
             type: 'play',
@@ -134,7 +149,7 @@ describe('strategicStrategy', () => {
             passDesirability: 1,
         })
 
-        const result = strategicStrategy.chooseAction(state)
+        const result = strategy.chooseAction(state)
 
         expect(result).toEqual({ type: 'pass' })
         expect(mocks.evaluateCardActions).not.toHaveBeenCalled()
@@ -152,7 +167,7 @@ describe('strategicStrategy', () => {
             passDesirability: 1,
         })
 
-        const result = strategicStrategy.chooseAction(state)
+        const result = strategy.chooseAction(state)
 
         expect(result).toEqual({ type: 'pass' })
         expect(mocks.evaluateCardActions).not.toHaveBeenCalled()
@@ -172,7 +187,7 @@ describe('strategicStrategy', () => {
         })
         mocks.evaluateCardActions.mockReturnValue([evaluation(card)])
 
-        const result = strategicStrategy.chooseAction(state)
+        const result = strategy.chooseAction(state)
 
         expect(result).toEqual({
             type: 'play',
@@ -203,7 +218,7 @@ describe('strategicStrategy', () => {
         const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.95)
 
         try {
-            const result = strategicStrategy.chooseAction(state)
+            const result = strategy.chooseAction(state)
 
             expect(result).toEqual({
                 type: 'play',
@@ -228,7 +243,7 @@ describe('strategicStrategy', () => {
         })
         mocks.evaluateCardActions.mockReturnValue([evaluation(ace)])
 
-        const result = strategicStrategy.chooseAction(state)
+        const result = strategy.chooseAction(state)
 
         expect(result).toEqual({ type: 'pass' })
     })

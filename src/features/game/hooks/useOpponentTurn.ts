@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react'
-import { strategicStrategy } from '../../../game/opponent/strategic/strategy'
+import { strategy } from '../../../game/opponent/strategic/strategy'
 import { executeOpponentDecision } from '../../../game/opponent/executeDecision'
 import type { GameState } from '../../../game/game'
 
@@ -25,7 +25,7 @@ export function useOpponentTurn({
         }
 
         const timeoutId = window.setTimeout(() => {
-            const decision = strategicStrategy.chooseAction(game)
+            const decision = strategy.chooseAction(game)
 
             setGame((currentGame) => {
                 if (
