@@ -1,48 +1,60 @@
 import { runSimulation } from './runSimulation'
-// import { conservativeStrategy } from '../src/game/opponent/conservativeStrategy'
-// import { strategy } from '../src/game/opponent/strategic/strategy'
+import { conservativeStrategy } from '../src/game/opponent/conservativeStrategy'
+import { randomStrategy } from '../src/game/opponent/randomStrategy'
 import { loadStrategies } from './strategies/loadStrategies'
 
+const GAMES_PER_SIDE = 500
+
 async function main(): Promise<void> {
-    const [
-        gameCountArgument = '100',
-        player1Name = 'strategy_1',
-        player2Name = 'strategy_2',
-    ] = process.argv.slice(2)
-
-    const gameCount = Number(gameCountArgument)
-
-    if (!Number.isInteger(gameCount) || gameCount < 1) {
-        throw new Error('Please provide a positive integer for the game count.')
-    }
-
     const strategies = await loadStrategies()
 
-    const player1 = strategies.find(
-        (item) => item.name === player1Name,
-    )
-
-    const player2 = strategies.find(
-        (item) => item.name === player2Name,
-    )
-
-    if (player1 === undefined) {
-        throw new Error(`Could not find strategy: ${player1Name}`)
+    if (strategies.length === 0) {
+        throw new Error('No generated strategies were found.')
     }
 
-    if (player2 === undefined) {
-        throw new Error(`Could not find strategy: ${player2Name}`)
+    console.log(`Found ${strategies.length} generated strategies.`)
+    console.log(`Each strategy will play 200 games.`)
+    console.log(`Total games: ${strategies.length * 200}`)
+    console.log('')
+
+    for (const candidate of strategies) {
+        console.log(`Testing ${candidate.name}...`)
+
+        // Conservative strategy: 50 games in each player position.
+        console.log('  Against Conservative (Player 1)')
+        await runSimulation(
+            candidate.strategy,
+            conservativeStrategy,
+            GAMES_PER_SIDE,
+        )
+
+        console.log('  Against Conservative (Player 2)')
+        await runSimulation(
+            conservativeStrategy,
+            candidate.strategy,
+            GAMES_PER_SIDE,
+        )
+
+        // Random strategy: 50 games in each player position.
+        console.log('  Against Random (Player 1)')
+        await runSimulation(
+            candidate.strategy,
+            randomStrategy,
+            GAMES_PER_SIDE,
+        )
+
+        console.log('  Against Random (Player 2)')
+        await runSimulation(
+            randomStrategy,
+            candidate.strategy,
+            GAMES_PER_SIDE,
+        )
+
+        console.log(`Finished ${candidate.name}.`)
+        console.log('')
     }
 
-    console.log(`Running ${gameCount} games:`)
-    console.log(`Player 1: ${player1.name}`)
-    console.log(`Player 2: ${player2.name}`)
-
-    await runSimulation(
-        player1.strategy,
-        player2.strategy,
-        gameCount,
-    )
+    console.log('All simulations completed.')
 }
 
 main().catch((error: unknown) => {
