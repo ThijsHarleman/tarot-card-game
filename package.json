@@ -8,8 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "evaluate-generation": "tsx scripts/evaluateGenerationCli.ts",
+    "evolve": "tsx scripts/evolveSeries.ts",
+    "evolve-generation": "tsx scripts/evolve.ts",
     "generate-strategies": "tsx scripts/generateStrategies.ts",
     "simulate": "tsx scripts/simulate.ts",
+    "simulate-generation": "tsx scripts/simulateGeneration.ts",
     "test": "vitest"
   },
   "dependencies": {

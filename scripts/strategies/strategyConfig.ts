@@ -115,31 +115,18 @@ function getRandomInteger(
     return Math.floor(value * (max - min + 1)) + min
 }
 
-function validateNumericRange(range: NumericRange): void {
-    if (
-        !Number.isFinite(range.min) ||
-        !Number.isFinite(range.max) ||
-        range.min > range.max ||
-        !Number.isInteger(range.precision) ||
-        range.precision < 0 ||
-        range.precision > 10
-    ) {
-        throw new RangeError('Invalid numeric generation range')
-    }
-}
-
 function generateNumber(
     range: NumericRange,
     random: Random,
 ): number {
-    validateNumericRange(range)
-
     const scale = 10 ** range.precision
-    const min = Math.ceil(range.min * scale)
-    const max = Math.floor(range.max * scale)
+    const min = toMinimumTick(range.min, scale)
+    const max = toMaximumTick(range.max, scale)
 
     if (min > max) {
-        throw new RangeError('Numeric range contains no values at the requested precision')
+        throw new RangeError(
+            'Numeric range contains no values at the requested precision',
+        )
     }
 
     return getRandomInteger(min, max, random) / scale
@@ -153,6 +140,22 @@ function validateIntegerRange(range: IntegerRange): void {
     ) {
         throw new RangeError('Invalid integer generation range')
     }
+}
+
+function toMinimumTick(value: number, scale: number): number {
+    const scaled = value * scale
+    const tolerance =
+        Number.EPSILON * Math.max(1, Math.abs(scaled)) * 4
+
+    return Math.ceil(scaled - tolerance)
+}
+
+function toMaximumTick(value: number, scale: number): number {
+    const scaled = value * scale
+    const tolerance =
+        Number.EPSILON * Math.max(1, Math.abs(scaled)) * 4
+
+    return Math.floor(scaled + tolerance)
 }
 
 /**
@@ -195,8 +198,8 @@ function generateRoundWeights(
         }
 
         return {
-            min: Math.ceil(range.min * scale),
-            max: Math.floor(range.max * scale),
+            min: toMinimumTick(range.min, scale),
+            max: toMaximumTick(range.max, scale),
         }
     })
 

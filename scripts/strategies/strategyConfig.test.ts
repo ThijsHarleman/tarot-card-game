@@ -116,4 +116,30 @@ describe('generateStrategyConfig', () => {
             },
         })).toThrow('Round weight ranges cannot sum to 1')
     })
+
+    it('accepts fixed decimal weights without floating-point rounding errors', () => {
+        const options = {
+            ...DEFAULT_GENERATION_OPTIONS,
+            roundEvaluation: {
+                ...DEFAULT_GENERATION_OPTIONS.roundEvaluation,
+                bidQualityWeight: { min: 0.58, max: 0.58 },
+                prizeValueWeight: { min: 0.14, max: 0.14 },
+                winningOpportunityWeight: { min: 0.28, max: 0.28 },
+            },
+        }
+
+        const config = generateStrategyConfig(options)
+
+        const weights = [
+            config.roundEvaluation.bidQualityWeight,
+            config.roundEvaluation.prizeValueWeight,
+            config.roundEvaluation.winningOpportunityWeight,
+        ]
+
+        expect(weights[0]).toBe(0.58)
+        expect(weights[1]).toBe(0.14)
+        expect(weights[2]).toBe(0.28)
+        expect(weights.reduce((total, weight) => total + weight, 0))
+            .toBeCloseTo(1, 10)
+    })
 })
