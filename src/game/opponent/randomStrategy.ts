@@ -13,23 +13,26 @@ export const randomStrategy: OpponentStrategy = {
             return { type: 'pass' }
         }
 
-        // Passing is allowed only after at least one card has been bid.
+        // Passing is an additional option after the first bid.
         const canPass = state.playedCards.length > 0
+        const optionCount = legalCards.length + (canPass ? 1 : 0)
 
-        // If passing is allowed, randomly choose between passing and playing.
-        if (canPass && Math.random() < 0.5) {
+        const selectedIndex = Math.floor(Math.random() * optionCount)
+
+        // The final option represents passing.
+        if (canPass && selectedIndex === legalCards.length) {
             return { type: 'pass' }
         }
 
-        // Choose randomly from legal cards only.
-        const index = Math.floor(Math.random() * legalCards.length)
-        const card = legalCards[index]
+        const selectedCard = legalCards[selectedIndex]
 
-        // Defensive guard in case the selection unexpectedly fails.
-        if (card === undefined) {
+        if (selectedCard === undefined) {
             return { type: 'pass' }
         }
 
-        return { type: 'play', cardId: card.id }
+        return {
+            type: 'play',
+            cardId: selectedCard.id,
+        }
     },
 }
