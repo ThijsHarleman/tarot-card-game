@@ -214,8 +214,8 @@ describe('strategy', () => {
             evaluation(lowerScoreCard, 0.1),
         ])
 
-        // A random value of 0.95 falls into the lower-scoring card's range.
-        const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.95)
+        // A random value of 0.995 falls into the lower-scoring card's range.
+        const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.995)
 
         try {
             const result = strategy.chooseAction(state)

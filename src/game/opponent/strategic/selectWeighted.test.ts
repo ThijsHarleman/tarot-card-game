@@ -13,11 +13,11 @@ describe('selectWeighted', () => {
     })
 
     it('selects the second option when the random value falls in its range', () => {
-        expect(selectWeighted(options, () => 0.75)).toBe('B')
+        expect(selectWeighted(options, () => 0.95)).toBe('B')
     })
 
     it('selects the third option when the random value falls in its range', () => {
-        expect(selectWeighted(options, () => 0.95)).toBe('C')
+        expect(selectWeighted(options, () => 0.99)).toBe('C')
     })
 
     it('rejects an empty collection', () => {
@@ -31,5 +31,10 @@ describe('selectWeighted', () => {
                 { value: 'B', weight: 0 },
             ]),
         ).toThrow()
+    })
+
+    it('preserves the original weighted selection when the exponent is 1', () => {
+        expect(selectWeighted(options, () => 0.75, 1)).toBe('B')
+        expect(selectWeighted(options, () => 0.95, 1)).toBe('C')
     })
 })
