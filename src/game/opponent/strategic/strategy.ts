@@ -53,9 +53,10 @@ function canPassStrategically(state: GameState): boolean {
 
 export function createStrategy(
     config: StrategyConfig = DEFAULT_STRATEGY_CONFIG,
+    name = 'Strategic',
 ): OpponentStrategy {
     return {
-        name: 'Strategic',
+        name,
 
         chooseAction(state: GameState): OpponentDecision {
             try {
