@@ -34,24 +34,22 @@ function playFallbackCard(
     return playCard(state, lowestCard.id)
 }
 
-export function executeOpponentDecision(
+export function executeDecision(
     state: GameState,
     decision: OpponentDecision,
+    activePlayerId: GameState['activePlayerId'],
 ): GameState {
-    if (state.isGameOver || state.activePlayerId !== 'opponent') {
+    if (state.isGameOver || state.activePlayerId !== activePlayerId) {
         return state
     }
 
     const legalCards = getLegalCards(state)
 
-    // If no card can be played, passing is the only fallback.
     if (legalCards.length === 0) {
         return passTurn(state)
     }
 
     if (decision.type === 'pass') {
-        // Passing is not allowed before the first bid.
-        // If the strategy wants to pass here, play a fallback card.
         if (state.playedCards.length === 0) {
             return playFallbackCard(state, legalCards)
         }
@@ -59,10 +57,16 @@ export function executeOpponentDecision(
         return passTurn(state)
     }
 
-    // Reject a strategy decision that attempts an illegal play.
     if (!legalCards.some((card) => card.id === decision.cardId)) {
         return state
     }
 
     return playCard(state, decision.cardId)
+}
+
+export function executeOpponentDecision(
+    state: GameState,
+    decision: OpponentDecision,
+): GameState {
+    return executeDecision(state, decision, 'opponent')
 }
